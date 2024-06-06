@@ -25,13 +25,22 @@ namespace OrderingSystem.WebApi.Controllers
         [HttpGet]
         [ProducesResponseType(type: typeof(List<MenuDto>), 200)]
         [Route("all")]
-        public async Task<IActionResult> GetAllMenus()
+        public async Task<IActionResult> GetAllMenus(bool? isActive)
         {
-            var result = await menuService.GetAllMenus();
+            var result = await menuService.GetAllMenus(isActive);
+            return Ok(result);
+        }
+        [HttpGet]
+        [ProducesResponseType(type: typeof(MenuByTypeDto), 200)]
+        [Route("all/bytype")]
+        public async Task<IActionResult> GetAllMenusByTypes(bool? isActive)
+        {
+            var result = await menuService.GetMenusByTypes(isActive);
             return Ok(result);
         }
         [HttpGet]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
+        [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
         [Route("{menuId}")]
         public async Task<IActionResult> GetMenuById(Guid menuId)
         {
@@ -41,6 +50,7 @@ namespace OrderingSystem.WebApi.Controllers
         [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
+        [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
         [Route("{menuId}")]
         public async Task<IActionResult> UpdateMenu([FromBody]UpdateMenuDto menuDto, Guid menuId)
         {
@@ -51,6 +61,7 @@ namespace OrderingSystem.WebApi.Controllers
         [Authorize(Roles = "ADMIN")]
         [HttpDelete]
         [ProducesResponseType(204)]
+        [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
         [Route("{menuId}")]
         public async Task<IActionResult> DeleteMenu(Guid menuId)
         {

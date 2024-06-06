@@ -9,6 +9,7 @@ namespace OrderingSystem.Application
         public static void AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IBaseRepository, BaseRepository>();
+            services.AddScoped<IMenuRepository, MenuRepository>();
 
             services.AddScoped<IMenuService, MenuService>();
         }

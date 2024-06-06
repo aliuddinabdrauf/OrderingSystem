@@ -58,7 +58,7 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
             });
             modelBuilder.Entity<TblMenu>(entity =>
             {
-                entity.HasIndex(e => e.Name).IsUnique();
+                entity.HasIndex(e => e.Name).IsUnique().HasFilter("is_deleted = false");
                 entity.Property(e => e.Name).HasMaxLength(100);
                 entity.Property(e => e.Description).HasMaxLength(1000);
                 entity.HasOne( e=> e.MenuGroup).WithMany(e => e.Menus).HasForeignKey(e => e.MenuGroupId)

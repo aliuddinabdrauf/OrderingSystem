@@ -26,6 +26,12 @@ namespace OrderingSystem.Infrastructure.Dtos
     {
 
     }
+    public class  MenuGroupDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
     public class MenuDto
     {
         public Guid Id { get; set; }
@@ -33,6 +39,15 @@ namespace OrderingSystem.Infrastructure.Dtos
         public MenuType MenuType { get; set; }
         public double Price { get; set; }
         public string Description { get; set; }
-        public Guid? MenuGroupId { get; set; }
+        public bool IsActive { get; set; }
+        public MenuGroupDto? MenuGroup { get; set; }
+    }
+
+    public class MenuByTypeDto
+    {
+        public List<MenuDto> Others { get; set; }
+        public List<MenuDto> MainCourse { get; set; }
+        public List<MenuDto> Drinks { get; set; }
+        public List<MenuDto> Desert { get; set; }
     }
 }
