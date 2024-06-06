@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
 {
-    public class TblBaseSoftDelete : TblBase
+    public class TblBaseSoftDelete
     {
+        public Guid Id { get; set; }
+        public DateTimeOffset TimestampCreated { get; set; }
+        public DateTimeOffset TimestampUpdated { get; set; }
         public bool IsDeleted { get; set; }
-        public DateTimeOffset TimestampDeleted { get; set; }
+        public DateTimeOffset? TimestampDeleted { get; set; }
     }
 }

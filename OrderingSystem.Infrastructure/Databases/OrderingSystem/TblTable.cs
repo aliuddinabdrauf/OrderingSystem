@@ -6,19 +6,10 @@ using System.Threading.Tasks;
 
 namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
 {
-   
-    public enum MenuType
+    public class TblTable: TblBaseSoftDelete
     {
-        Others,
-        MainCourse,
-        Drinks,
-        Dessert
-    }
-
-    public enum PaymentType
-    {
-        Cash,
-        QrScan,
-        CreditCard
+        public int Number {  get; set; }
+        public Guid OrderId { get; set; }
+        public ICollection<TblOrder> Orders { get; set; }
     }
 }
