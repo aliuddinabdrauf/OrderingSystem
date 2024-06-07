@@ -21,6 +21,7 @@ namespace OrderingSystem.Application.Repositories
         Task CommitTransaction();
         void DeleteData<T>(T entity) where T : class;
         void DeleteDataBatch<T>(IEnumerable<T> entities) where T : class;
+        Task DeleteDataById<T>(Guid guid) where T : class;
         Task DeleteDataById_E<T>(Guid id, Guid? userId = null) where T : TblBaseSoftDelete;
         Task<List<T>> GetAllData<T>(bool isTracked = true) where T : class;
         Task<List<T>> GetAllDataWithCondition<T>(Expression<Func<T, bool>> predicate, bool isTracked = true) where T : class;
@@ -101,6 +102,11 @@ namespace OrderingSystem.Application.Repositories
         public void DeleteData<T>(T entity) where T : class
         {
             context.Set<T>().Remove(entity);
+        }
+        public async Task DeleteDataById<T>(Guid guid) where T : class
+        {
+            var toRemove = await context.Set<T>().FindAsync(guid) ?? throw new RecordNotFoundException("No data found to be deleted");
+            context.Set<T>().Remove(toRemove);
         }
         /// <summary>
         /// this method will not have audit trail inserted

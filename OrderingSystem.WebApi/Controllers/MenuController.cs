@@ -9,12 +9,15 @@ using System.Security.Claims;
 namespace OrderingSystem.WebApi.Controllers
 {
     [Route("api/menu")]
+    [EndpointGroupName("Menu")]
     [ApiController]
     public class MenuController(IMenuService menuService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
         [Authorize(Roles = "ADMIN")]
         [HttpPut]
         [ProducesResponseType(typeof(MenuDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         [Route("add")]
         public async Task<IActionResult> AddMenu([FromBody] AddMenuDto addMenu)
         {
@@ -32,10 +35,10 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpGet]
         [ProducesResponseType(type: typeof(MenuByTypeDto), 200)]
-        [Route("all/bytype")]
-        public async Task<IActionResult> GetAllMenusByTypes(bool? isActive)
+        [Route("all/grupByType")]
+        public async Task<IActionResult> GetMenusGroupedByTypes(bool? isActive)
         {
-            var result = await menuService.GetMenusByTypes(isActive);
+            var result = await menuService.GetMenusGroupedByTypes(isActive);
             return Ok(result);
         }
         [HttpGet]
@@ -51,6 +54,8 @@ namespace OrderingSystem.WebApi.Controllers
         [HttpPost]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
         [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         [Route("{menuId}")]
         public async Task<IActionResult> UpdateMenu([FromBody]UpdateMenuDto menuDto, Guid menuId)
         {
@@ -62,12 +67,39 @@ namespace OrderingSystem.WebApi.Controllers
         [HttpDelete]
         [ProducesResponseType(204)]
         [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         [Route("{menuId}")]
         public async Task<IActionResult> DeleteMenu(Guid menuId)
         {
             Guid userId = new Guid(userManager.GetUserId(User));
             await menuService.DeleteMenu(menuId, userId);
             return NoContent();
+        }
+    }
+    [Route("api/menu/group")]
+    [ApiController]
+    [EndpointGroupName("Menu Group")]
+    public class MenuGroupController(IMenuService menuService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
+    {
+        [HttpGet]
+        [Route("all")]
+        [EndpointName("Get All Menu Group")]
+        [ProducesResponseType(typeof(List<MenuGroupDto>), 200)]
+        public async Task<IActionResult> GetAllMenuGroup()
+        {
+            var result = await menuService.GetAllMenuGroup();
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("{groupId}")]
+        [EndpointName("Get Menu Group By Id")]
+        [ProducesResponseType(typeof(MenuGroupDto), 200)]
+        [ProducesResponseType(typeof(ResponseProblemDto), 404)]
+        public async Task<IActionResult> GetMenuGroupById(Guid groupId)
+        {
+            var result = await menuService.GetMenuGroupById(groupId);
+            return Ok(result);
         }
     }
 }

@@ -22,9 +22,7 @@ namespace OrderingSystem.Application.Repositories
         public async Task<TblMenu> GetMenuById(Guid menuId)
         {
             var result = await context.TblMenu.Include(o => o.MenuGroup)
-                 .SingleOrDefaultAsync(o => o.Id == menuId);
-            if (result is null)
-                throw new RecordNotFoundException("Menu not exist");
+                 .SingleOrDefaultAsync(o => o.Id == menuId) ?? throw new RecordNotFoundException();
             return result;
         }
         public async Task<List<TblMenu>> GetAllMenu(bool? isActive)

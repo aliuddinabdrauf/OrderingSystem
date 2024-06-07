@@ -32,6 +32,15 @@ namespace OrderingSystem.Infrastructure.Dtos
         public string Name { get; set; }
         public string Description { get; set; }
     }
+    public class AddMenuGroupDto
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+    public class UpdateMenuGroupDto : AddMenuGroupDto
+    {
+
+    }
     public class MenuDto
     {
         public Guid Id { get; set; }

@@ -9,11 +9,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OrderingSystem.Infrastructure;
+using System.ComponentModel.DataAnnotations;
 
 namespace OrderingSystem.Application.Utils
 {   
     public static class Helper
     {
+        public static bool StringIsEmail(this string email)
+        {
+            var e = new EmailAddressAttribute();
+            return e.IsValid(email);
+        }
         public static bool IsCustomException(this Exception e)
         {
             return e.GetType().IsSubclassOf(typeof(CustomException));
