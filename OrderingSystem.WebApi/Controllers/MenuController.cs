@@ -5,12 +5,14 @@ using OrderingSystem.Application.Services;
 using OrderingSystem.Infrastructure.Dtos;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using OrderingSystem.Application.Utils;
 
 namespace OrderingSystem.WebApi.Controllers
 {
     [Route("api/menu")]
-    [EndpointGroupName("Menu")]
     [ApiController]
+    [Produces("application/json")]
     public class MenuController(IMenuService menuService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
         [Authorize(Roles = "ADMIN")]
@@ -43,7 +45,7 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpGet]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
-        [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
+        [ProducesResponseType(type: typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
         [Route("{menuId}")]
         public async Task<IActionResult> GetMenuById(Guid menuId)
         {
@@ -53,7 +55,7 @@ namespace OrderingSystem.WebApi.Controllers
         [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
-        [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
+        [ProducesResponseType(type: typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [Route("{menuId}")]
@@ -66,7 +68,7 @@ namespace OrderingSystem.WebApi.Controllers
         [Authorize(Roles = "ADMIN")]
         [HttpDelete]
         [ProducesResponseType(204)]
-        [ProducesResponseType(type: typeof(ResponseProblemDto), 404)]
+        [ProducesResponseType(type: typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [Route("{menuId}")]
@@ -76,10 +78,27 @@ namespace OrderingSystem.WebApi.Controllers
             await menuService.DeleteMenu(menuId, userId);
             return NoContent();
         }
+        [HttpPost]
+        [Authorize(Roles = "ADMIN")]
+        [Route("upload/image")]
+        [ProducesResponseType(typeof(List<AddFileResultDto>), 200)]
+        [ProducesResponseType(typeof(List<AddFileResultDto>), 207)]
+        [RequestSizeLimit(1000000)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(typeof(ResponseProblemDto),400, contentType: "application/problem+json")]
+        public async Task<IActionResult> UploadImages([FromForm] IFormFileCollection files)
+        {
+            var (result, status) = await menuService.UploadMenuImages(files);
+            if (status == HttpMultiStatus.Success)
+                return Ok(result);
+            else
+                return StatusCode(207, result);
+        }
     }
     [Route("api/menu/group")]
     [ApiController]
-    [EndpointGroupName("Menu Group")]
+    [Produces("application/json")]
     public class MenuGroupController(IMenuService menuService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
         [HttpGet]
@@ -95,11 +114,52 @@ namespace OrderingSystem.WebApi.Controllers
         [Route("{groupId}")]
         [EndpointName("Get Menu Group By Id")]
         [ProducesResponseType(typeof(MenuGroupDto), 200)]
-        [ProducesResponseType(typeof(ResponseProblemDto), 404)]
+        [ProducesResponseType(typeof(ResponseProblemDto), 404, contentType:"application/problem+json")]
         public async Task<IActionResult> GetMenuGroupById(Guid groupId)
         {
             var result = await menuService.GetMenuGroupById(groupId);
             return Ok(result);
+        }
+        [HttpPut]
+        [Authorize(Roles ="ADMIN")]
+        [Route("add")]
+        [EndpointName("Add Menu Group")]
+        [ProducesResponseType(typeof(MenuGroupDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        public async Task<IActionResult> AddMenuGroup([FromBody] AddMenuGroupDto addMenuGroup)
+        {
+            Guid userId = new Guid(userManager.GetUserId(User));
+            var result = await menuService.AddMenuGroup(addMenuGroup, userId);
+            return Ok(result);
+        }
+        [HttpPost]
+        [Authorize(Roles = "ADMIN")]
+        [Route("update/{groupId}")]
+        [EndpointName("Update Menu Group")]
+        [ProducesResponseType(typeof(MenuGroupDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
+        public async Task<IActionResult> UpdateMenuGroup(Guid groupId, [FromBody] UpdateMenuGroupDto updateMenuGroup)
+        {
+            Guid userId = new Guid(userManager.GetUserId(User));
+            var result = await menuService.UpdateMenuGroup(updateMenuGroup, groupId, userId);
+            return Ok(result);
+        }
+        [HttpDelete]
+        [Authorize(Roles = "ADMIN")]
+        [Route("delete/{groupId}")]
+        [EndpointName("Delete Menu Group")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
+        public async Task<IActionResult> DeleteMenuGroup(Guid groupId)
+        {
+            Guid userId = new Guid(userManager.GetUserId(User));
+            await menuService.DeleteMenuGroup(groupId, userId);
+            return NoContent();
         }
     }
 }

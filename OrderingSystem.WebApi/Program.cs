@@ -22,7 +22,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Test01", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ordering System", Version = "v1" });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
@@ -115,6 +115,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddApplicationServices();
 
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -134,6 +136,5 @@ app.MapGroup("/api/usermanager").MapIdentityApi<IdentityUser<Guid>>();
 app.MapControllers();
 
 app.UseAuthorization();
-
 
 app.Run();

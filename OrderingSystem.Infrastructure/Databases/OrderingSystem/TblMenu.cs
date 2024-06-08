@@ -16,5 +16,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public ICollection<TblOrder> Orders { get; set; }
         public Guid? MenuGroupId { get; set; }
         public TblMenuGroup? MenuGroup { get; set; }
+        public ICollection<TblMenuImage> MenuImages { get; set; }
     }
 }

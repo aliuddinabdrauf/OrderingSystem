@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
@@ -11,9 +12,11 @@ using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 namespace OrderingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingSystemDbContext))]
-    partial class OrderingSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240608042646_UpdateTblFile2")]
+    partial class UpdateTblFile2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -403,10 +406,6 @@ namespace OrderingSystem.Infrastructure.Migrations
                     b.Property<Guid>("MenuId")
                         .HasColumnType("uuid")
                         .HasColumnName("menu_id");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer")
-                        .HasColumnName("order");
 
                     b.HasIndex("FileId")
                         .HasDatabaseName("ix_tbl_menu_image_file_id");

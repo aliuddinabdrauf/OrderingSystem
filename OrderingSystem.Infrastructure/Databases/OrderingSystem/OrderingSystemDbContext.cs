@@ -26,6 +26,8 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public virtual DbSet<TblMenuGroup> TblMenuGroup { get; set; }
         public virtual DbSet<TblOrderToReciept> TblOrderToReciept { get; set; }
         public virtual DbSet<TblAuditTrail> TblAuditTrail { get; set; }
+        public virtual DbSet<TblFile> TblFile { get; set; }
+        public virtual DbSet<TblMenuImage> TblMenuImage { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -86,6 +88,21 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
             {
                 entity.Property(e => e.TableName).HasMaxLength(100);
                 entity.Property(e => e.Data).HasMaxLength(int.MaxValue);
+            });
+            modelBuilder.Entity<TblFile>(entity =>
+            {
+                entity.Property(e => e.Name).HasMaxLength(100);
+                entity.Property(e => e.Extension).HasMaxLength(10);
+                entity.Property(e => e.Data).HasMaxLength(10000000);
+            });
+            modelBuilder.Entity<TblMenuImage>(entity =>
+            {
+                entity.HasOne(e => e.Menu).WithMany(e => e.MenuImages)
+                .HasForeignKey(e => e.MenuId)
+                .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(e => e.Image).WithMany(e => e.MenuImages)
+                .HasForeignKey(e => e.FileId)
+                .OnDelete(DeleteBehavior.NoAction);
             });
         }
     }

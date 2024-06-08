@@ -22,10 +22,11 @@ namespace OrderingSystem.WebApi.Middlewares
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var code = HttpStatusCode.InternalServerError; // 500 if unexpected
-            if (exception is RecordNotFoundException or NoDataUpdatedException) code = HttpStatusCode.NotFound;
-            else if (exception is ActionNotValidException or EmailOrPasswordNotValidException) code = HttpStatusCode.BadRequest;
-            else if (exception is UserNotAuthorizedException) code = HttpStatusCode.Forbidden;
-            else if (exception is UserNotAuthenticatedException) code = HttpStatusCode.Unauthorized;
+            if (exception is BadHttpRequestException || exception.GetType().IsSubclassOf(typeof(BadHttpRequestException)))
+            {
+                var badE = exception as BadHttpRequestException;
+                code = badE is not null ? (HttpStatusCode)badE.StatusCode : HttpStatusCode.InternalServerError;
+            }
 
             var error = new ResponseProblemDto
             {

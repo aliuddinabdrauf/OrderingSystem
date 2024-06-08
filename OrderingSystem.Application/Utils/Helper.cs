@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OrderingSystem.Infrastructure;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace OrderingSystem.Application.Utils
 {   
@@ -51,6 +52,16 @@ namespace OrderingSystem.Application.Utils
                 updateExp = setter => setter.SetProperty(x => x.TimestampUpdated, DateTimeOffset.UtcNow);
             setPropertyCalls = setPropertyCalls.Update(updateExp.Body, updateExp.Parameters);
             return await source.ExecuteUpdateAsync(setPropertyCalls, cancellationToken);
+        }
+        public static byte[] ToByteArray(this IFormFile file)
+        {
+            byte[] fileByteArray;
+            using (var item = new MemoryStream())
+            {
+                file.CopyTo(item);
+                fileByteArray = item.ToArray();
+            }
+            return fileByteArray;
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
@@ -11,9 +12,11 @@ using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 namespace OrderingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingSystemDbContext))]
-    partial class OrderingSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240608041850_AddTblFileForMenuImage")]
+    partial class AddTblFileForMenuImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -369,19 +372,14 @@ namespace OrderingSystem.Infrastructure.Migrations
 
                     b.Property<byte[]>("Data")
                         .IsRequired()
-                        .HasMaxLength(10000000)
+                        .HasMaxLength(1100000)
                         .HasColumnType("bytea")
                         .HasColumnName("data");
 
                     b.Property<string>("Extension")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
+                        .HasColumnType("text")
                         .HasColumnName("extension");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint")
-                        .HasColumnName("file_size");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -403,10 +401,6 @@ namespace OrderingSystem.Infrastructure.Migrations
                     b.Property<Guid>("MenuId")
                         .HasColumnType("uuid")
                         .HasColumnName("menu_id");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer")
-                        .HasColumnName("order");
 
                     b.HasIndex("FileId")
                         .HasDatabaseName("ix_tbl_menu_image_file_id");

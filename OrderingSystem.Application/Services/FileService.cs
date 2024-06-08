@@ -1,0 +1,48 @@
+﻿using Mapster;
+using OrderingSystem.Application.Repositories;
+using OrderingSystem.Infrastructure;
+using OrderingSystem.Infrastructure.Databases.OrderingSystem;
+using OrderingSystem.Infrastructure.Dtos;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OrderingSystem.Application.Services
+{
+    public interface IFileService
+    {
+        Task<AddFileResultDto> AddFile(AddFileDto addFile);
+        Task<List<AddFileResultDto>> AddFiles(List<AddFileDto> addFiles);
+    }
+
+    public class FileService(IBaseRepository baseRepository) : IFileService
+    {
+        private const long maxSize = 10000000;
+        public async Task<AddFileResultDto> AddFile(AddFileDto addFile)
+        {
+            if (addFile.FileSize > maxSize)
+                throw new BadRequestException("File must not exceed 10mb in size");
+            var toSave = addFile.Adapt<TblFile>();
+            baseRepository.AddData(toSave);
+            await baseRepository.SaveChanges();
+            return toSave.Adapt<AddFileResultDto>();
+        }
+        /// <summary>
+        /// this method may consume a lot of memory if use concurrently
+        /// </summary>
+        /// <param name="addFiles"></param>
+        /// <returns></returns>
+        /// <exception cref="BadRequestException"></exception>
+        public async Task<List<AddFileResultDto>> AddFiles(List<AddFileDto> addFiles)
+        {
+            if (addFiles.Any(o => o.FileSize > maxSize))
+                throw new BadRequestException("File must not exceed 10mb in size");
+            var toSave = addFiles.Adapt<List<TblFile>>();
+            baseRepository.AddDataBatch(toSave);
+            await baseRepository.SaveChanges();
+            return toSave.Adapt<List<AddFileResultDto>>();
+        }
+    }
+}

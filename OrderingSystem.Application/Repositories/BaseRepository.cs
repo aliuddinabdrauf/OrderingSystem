@@ -160,7 +160,7 @@ namespace OrderingSystem.Application.Repositories
                 }
                 else if (entry.Entity != null && entry.Entity.GetType().IsSubclassOf(typeof(TblBase)))
                 {
-                    var entity = entry.Entity as TblBaseSoftDelete;
+                    var entity = entry.Entity as TblBase;
                     if (entity is not null)
                     {
                         if (entry.State == EntityState.Added)
