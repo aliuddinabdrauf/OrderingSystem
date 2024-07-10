@@ -38,6 +38,8 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
             modelBuilder.HasPostgresEnum<MenuType>();
             modelBuilder.HasPostgresEnum<PaymentType>();
             modelBuilder.HasPostgresEnum<EntityState>();
+            modelBuilder.HasPostgresEnum<OrderStatus>();
+            modelBuilder.HasPostgresEnum<MenuStatus>();
 
             modelBuilder.Entity<TblBase>(entity =>
             {
@@ -68,7 +70,7 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
             });
             modelBuilder.Entity<TblOrder>(entity =>
             {
-                entity.Property(e => e.Instruction).HasMaxLength(100);
+                entity.Property(e => e.Note).HasMaxLength(200);
                 entity.HasOne(e => e.Menu).WithMany(e => e.Orders)
                 .HasForeignKey(e => e.MenuId)
                 .OnDelete(DeleteBehavior.NoAction);
@@ -93,6 +95,7 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
             {
                 entity.Property(e => e.Name).HasMaxLength(100);
                 entity.Property(e => e.Extension).HasMaxLength(10);
+                entity.Property(e => e.ContentType).HasMaxLength(30);
                 entity.Property(e => e.Data).HasMaxLength(10000000);
             });
             modelBuilder.Entity<TblMenuImage>(entity =>

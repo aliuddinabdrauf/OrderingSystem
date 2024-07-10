@@ -9,6 +9,7 @@ using OrderingSystem.Infrastructure.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,14 +20,15 @@ namespace OrderingSystem.Application.Services
     {
         Task<MenuDto> AddMenu(AddMenuDto menuDto, Guid userId);
         Task<MenuGroupDto> AddMenuGroup(AddMenuGroupDto addMenuGroup, Guid userId);
+        Task AssignImagesToMenu(Guid menuId, List<Guid> imageIds);
         Task DeleteMenu(Guid menuId, Guid userId);
         Task DeleteMenuGroup(Guid groupId, Guid userId);
         Task<List<MenuGroupDto>> GetAllMenuGroup();
-        Task<List<MenuDto>> GetAllMenus(bool? isActive);
+        Task<List<MenuDto>> GetAllMenus(bool? activeOnly);
         Task<MenuDto> GetMenuById(Guid menuId);
         Task<MenuGroupDto> GetMenuGroupById(Guid groupId);
-        Task<List<MenuDto>> GetMenusByGroup(Guid groupId, bool? isActive);
-        Task<MenuByTypeDto> GetMenusGroupedByTypes(bool? isActive);
+        Task<List<MenuDto>> GetMenusByGroup(Guid groupId, bool? activeOnly);
+        Task<MenuByTypeDto> GetMenusGroupedByTypes(bool? activeOnly);
         Task<MenuDto> UpdateMenu(UpdateMenuDto menuDto, Guid menuId, Guid userId);
         Task<MenuGroupDto> UpdateMenuGroup(UpdateMenuGroupDto menuGroupDto, Guid groupId, Guid userId);
         Task<(List<AddFileResultDto>, HttpMultiStatus)> UploadMenuImages(IFormFileCollection files);
@@ -42,21 +44,20 @@ namespace OrderingSystem.Application.Services
             return toSave.Adapt<MenuDto>();
         }
 
-        public async Task<List<MenuDto>> GetAllMenus(bool? isActive)
+        public async Task<List<MenuDto>> GetAllMenus(bool? activeOnly)
         {
-            var result = await menuRepository.GetAllMenu(isActive);
-            return result.Adapt<List<MenuDto>>();
+            var result = await menuRepository.GetAllMenu(activeOnly);
+            return result;
         }
         public async Task<MenuDto> GetMenuById(Guid menuId)
         {
             var result = await menuRepository.GetMenuById(menuId);
-            return result.Adapt<MenuDto>();
+            return result;
         }
         public async Task<MenuDto> UpdateMenu(UpdateMenuDto menuDto, Guid menuId, Guid userId)
         {
             var record = await baseRepository.GetDataById<TblMenu>(menuId);
             var toSave = menuDto.Adapt(record);
-            baseRepository.UpdateData(toSave);
             await baseRepository.SaveChanges(userId);
             return toSave.Adapt<MenuDto>();
         }
@@ -66,9 +67,9 @@ namespace OrderingSystem.Application.Services
             await baseRepository.SaveChanges(userId);
         }
 
-        public async Task<MenuByTypeDto> GetMenusGroupedByTypes(bool? isActive)
+        public async Task<MenuByTypeDto> GetMenusGroupedByTypes(bool? activeOnly)
         {
-            var allMenu = await menuRepository.GetAllMenu(isActive);
+            var allMenu = await menuRepository.GetAllMenu(activeOnly);
             var menuGrouped = allMenu.Adapt<List<MenuDto>>().GroupBy(o => o.MenuType);
             var result = new MenuByTypeDto();
             foreach(var menu in menuGrouped)
@@ -121,9 +122,18 @@ namespace OrderingSystem.Application.Services
             await baseRepository.DeleteDataById<TblMenuGroup>(groupId);
             await baseRepository.SaveChanges(userId);
         }
-        public async Task<List<MenuDto>> GetMenusByGroup(Guid groupId, bool? isActive)
+        public async Task<List<MenuDto>> GetMenusByGroup(Guid groupId, bool? activeOnly)
         {
-            var result = await baseRepository.GetAllDataWithCondition<TblMenu>(o => o.MenuGroupId == groupId && (isActive == null || o.IsActive == isActive));
+            Expression<Func<TblMenu, bool>> whereCond;
+            if(!activeOnly.HasValue || !activeOnly.Value)
+            {
+                whereCond = o => o.MenuGroupId == groupId;
+            }
+            else
+            {
+                whereCond = o => o.MenuGroupId == groupId && o.MenuStatus != MenuStatus.NotActive;
+            }
+            var result = await baseRepository.GetAllDataWithCondition<TblMenu>(whereCond);
             return result.Adapt(new List<MenuDto>());
         }
 
@@ -147,7 +157,7 @@ namespace OrderingSystem.Application.Services
                 var extension = Path.GetExtension(file.FileName);
                 try
                 {
-                    var toSave = new AddFileDto(fileName, extension, file.ToByteArray());
+                    var toSave = new AddFileDto(fileName, extension,  file.ContentType, file.ToByteArray(), true);
                     result.Add(await fileService.AddFile(toSave));
                 }
                 catch(Exception e)
@@ -162,6 +172,46 @@ namespace OrderingSystem.Application.Services
                 return (result, HttpMultiStatus.Multi);
             else
                 return (result, HttpMultiStatus.Success);
+        }
+        public async Task AssignImagesToMenu(Guid menuId, List<Guid> imageIds)
+        {
+            var imageFromDb = await baseRepository.GetAllDataWithCondition<TblMenuImage>(o => o.MenuId == menuId);
+            var toDelete = imageFromDb.Where(o => !imageIds.Contains(o.FileId));
+            var toUpdate = imageFromDb.Where(o => imageIds.Contains(o.FileId));
+            foreach(var image in toUpdate)
+            {
+                image.Order = imageIds.IndexOf(image.FileId) + 1;
+            }
+            var toAdd = new List<TblMenuImage>();
+            var order = 1;
+            foreach (var imageId in imageIds)
+            {
+                if(!toUpdate.Any(o => o.Id == imageId))
+                {
+                    toAdd.Add(new()
+                    {
+                        MenuId = menuId,
+                        FileId = imageId,
+                        Order = order,
+                    });
+                }
+                order++;
+            }
+            try
+            {
+                using var t = await baseRepository.StartTransaction();
+                baseRepository.DeleteDataBatch(toDelete);
+                //baseRepository.UpdateDataBatch(toUpdate);
+                baseRepository.AddDataBatch(toAdd);
+               await fileService.RemoveFiles(toDelete.Select(o => o.FileId));
+                await baseRepository.SaveChanges();
+                await baseRepository.CommitTransaction();
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Failed to map images to the menu");
+                throw new OperationAbortedException();
+            }
         }
     }
 }

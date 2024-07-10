@@ -21,4 +21,19 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         QrScan,
         CreditCard
     }
+    public enum OrderStatus
+    {
+        Placed,
+        Preparing,
+        Completed,
+        Rejected,
+        Paid
+    }
+    public enum MenuStatus
+    {
+        Available,
+        NotActive,
+        NotAvailable,
+        SoldOut
+    }
 }

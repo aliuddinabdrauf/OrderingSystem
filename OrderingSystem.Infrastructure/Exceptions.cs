@@ -26,4 +26,5 @@ namespace OrderingSystem.Infrastructure
     public class NoDataUpdatedException(string message) : BadHttpRequestException(message, 422);
     public class RecordAlreadyExistException(string message): BadHttpRequestException(message, 409);
     public class NotValidMediaType(string message): BadHttpRequestException(message, 415);
+    public class OperationAbortedException(string message ="Operation canceled, Something wrong happened. Please contact admin for further assistant.") : BadHttpRequestException(message, 500);
 }

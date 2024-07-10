@@ -1,3 +1,4 @@
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -8,9 +9,12 @@ using Npgsql;
 using OrderingSystem.Application;
 using OrderingSystem.Application.Utils;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
+using OrderingSystem.Infrastructure.Dtos;
+using OrderingSystem.WebApi;
 using OrderingSystem.WebApi.Middlewares;
 using Serilog;
 using Serilog.Events;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,6 +76,8 @@ var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetCon
 dataSourceBuilder.MapEnum<MenuType>();
 dataSourceBuilder.MapEnum<PaymentType>();
 dataSourceBuilder.MapEnum<EntityState>();
+dataSourceBuilder.MapEnum<OrderStatus>();
+dataSourceBuilder.MapEnum<MenuStatus>();
 var dataSource = dataSourceBuilder.Build();
 builder.Services.AddDbContext<OrderingSystemDbContext>(options =>
 {
@@ -80,6 +86,28 @@ builder.Services.AddDbContext<OrderingSystemDbContext>(options =>
 });
 //enable authorization
 builder.Services.AddAuthorization();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    // Adding Jwt Bearer
+.AddJwtBearer(options =>
+ {
+     options.SaveToken = true;
+     options.RequireHttpsMetadata = false;
+     options.TokenValidationParameters = new TokenValidationParameters()
+     {
+         ValidateIssuer = true,
+         ValidateAudience = true,
+         ValidAudience = builder.Configuration["JWT:ValidAudience"],
+         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+     };
+ });
+
 
 //add identity api
 builder.Services.AddIdentityApiEndpoints<IdentityUser<Guid>>(e =>
@@ -117,6 +145,12 @@ builder.Services.AddApplicationServices();
 
 builder.Services.AddHttpContextAccessor();
 
+//db table if map to list of guid, will automatically get the id
+TypeAdapterConfig<TblMenu, MenuDto>.NewConfig()
+    .Map(dest => dest.Images, src => src.MenuImages.Select(o => o.FileId));
+
+TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -129,12 +163,9 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.UseHttpsRedirection();
-
-//map identity route
-app.MapGroup("/api/usermanager").MapIdentityApi<IdentityUser<Guid>>();
-
 app.MapControllers();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();

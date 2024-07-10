@@ -15,9 +15,11 @@ namespace OrderingSystem.Application.Services
     {
         Task<AddFileResultDto> AddFile(AddFileDto addFile);
         Task<List<AddFileResultDto>> AddFiles(List<AddFileDto> addFiles);
+        Task<FileDto> GetPublicFileData(Guid fileId);
+        Task RemoveFiles(IEnumerable<Guid> fileIds);
     }
 
-    public class FileService(IBaseRepository baseRepository) : IFileService
+    public class FileService(IBaseRepository baseRepository, IFileRepository fileRepository) : IFileService
     {
         private const long maxSize = 10000000;
         public async Task<AddFileResultDto> AddFile(AddFileDto addFile)
@@ -43,6 +45,25 @@ namespace OrderingSystem.Application.Services
             baseRepository.AddDataBatch(toSave);
             await baseRepository.SaveChanges();
             return toSave.Adapt<List<AddFileResultDto>>();
+        }
+        public async Task RemoveFiles (IEnumerable<Guid> fileIds)
+        {
+            var toRemoves = new List<TblFile>();
+            foreach(var fileId in fileIds)
+            {
+                toRemoves.Add(new()
+                {
+                    Id = fileId,
+                });
+            }
+            baseRepository.DeleteDataBatch(toRemoves);
+            await baseRepository.SaveChanges();
+        }
+
+        public async Task<FileDto> GetPublicFileData(Guid fileId)
+        {
+            var data = await fileRepository.GetPublicFileData(fileId);
+            return data;
         }
     }
 }

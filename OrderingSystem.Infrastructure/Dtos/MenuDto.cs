@@ -1,4 +1,5 @@
-﻿using OrderingSystem.Infrastructure.Databases.OrderingSystem;
+﻿using Mapster;
+using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,7 +25,7 @@ namespace OrderingSystem.Infrastructure.Dtos
     }
     public class UpdateMenuDto : AddMenuDto
     {
-
+        public MenuStatus MenuStatus { get; set; }
     }
     public class  MenuGroupDto
     {
@@ -48,8 +49,9 @@ namespace OrderingSystem.Infrastructure.Dtos
         public MenuType MenuType { get; set; }
         public double Price { get; set; }
         public string Description { get; set; }
-        public bool IsActive { get; set; }
+        public MenuStatus MenuStatus { get; set; }
         public MenuGroupDto? MenuGroup { get; set; }
+        public List<Guid> Images { get; set; }
     }
 
     public class MenuByTypeDto

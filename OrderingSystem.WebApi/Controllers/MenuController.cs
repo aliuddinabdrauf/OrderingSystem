@@ -30,17 +30,17 @@ namespace OrderingSystem.WebApi.Controllers
         [HttpGet]
         [ProducesResponseType(type: typeof(List<MenuDto>), 200)]
         [Route("all")]
-        public async Task<IActionResult> GetAllMenus(bool? isActive)
+        public async Task<IActionResult> GetAllMenus(bool? activeOnly)
         {
-            var result = await menuService.GetAllMenus(isActive);
+            var result = await menuService.GetAllMenus(activeOnly);
             return Ok(result);
         }
         [HttpGet]
         [ProducesResponseType(type: typeof(MenuByTypeDto), 200)]
         [Route("all/grupByType")]
-        public async Task<IActionResult> GetMenusGroupedByTypes(bool? isActive)
+        public async Task<IActionResult> GetMenusGroupedByTypes(bool? activeOnly)
         {
-            var result = await menuService.GetMenusGroupedByTypes(isActive);
+            var result = await menuService.GetMenusGroupedByTypes(activeOnly);
             return Ok(result);
         }
         [HttpGet]
@@ -53,7 +53,7 @@ namespace OrderingSystem.WebApi.Controllers
             return Ok(result);
         }
         [Authorize(Roles = "ADMIN")]
-        [HttpPost]
+        [HttpPatch]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
         [ProducesResponseType(type: typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
         [ProducesResponseType(401)]
@@ -95,6 +95,18 @@ namespace OrderingSystem.WebApi.Controllers
             else
                 return StatusCode(207, result);
         }
+        [HttpPatch]
+        [Authorize(Roles ="ADMIN")]
+        [Route("{menuId}/asignImage")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
+        public async Task<IActionResult> AssignImagesToMenu(Guid menuId, List<Guid> imageIds)
+        {
+            await menuService.AssignImagesToMenu(menuId, imageIds);
+            return NoContent();
+        }
     }
     [Route("api/menu/group")]
     [ApiController]
@@ -133,7 +145,7 @@ namespace OrderingSystem.WebApi.Controllers
             var result = await menuService.AddMenuGroup(addMenuGroup, userId);
             return Ok(result);
         }
-        [HttpPost]
+        [HttpPatch]
         [Authorize(Roles = "ADMIN")]
         [Route("update/{groupId}")]
         [EndpointName("Update Menu Group")]

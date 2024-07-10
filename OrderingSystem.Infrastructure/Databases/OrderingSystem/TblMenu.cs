@@ -12,7 +12,7 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public MenuType MenuType { get; set; }
         public double Price { get; set; }
         public string Description { get; set; }
-        public bool IsActive { get; set; } = true;
+        public MenuStatus MenuStatus { get; set; }
         public ICollection<TblOrder> Orders { get; set; }
         public Guid? MenuGroupId { get; set; }
         public TblMenuGroup? MenuGroup { get; set; }

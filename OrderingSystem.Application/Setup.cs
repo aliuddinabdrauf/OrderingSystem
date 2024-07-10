@@ -10,9 +10,12 @@ namespace OrderingSystem.Application
         {
             services.AddScoped<IBaseRepository, BaseRepository>();
             services.AddScoped<IMenuRepository, MenuRepository>();
+            services.AddScoped<IFileRepository, FileRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
             services.AddScoped<IMenuService, MenuService>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IOrderService, OrderService>();
         }
     }
 }

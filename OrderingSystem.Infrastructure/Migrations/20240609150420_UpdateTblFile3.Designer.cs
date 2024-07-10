@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
@@ -11,9 +12,11 @@ using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 namespace OrderingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingSystemDbContext))]
-    partial class OrderingSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240609150420_UpdateTblFile3")]
+    partial class UpdateTblFile3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,6 @@ namespace OrderingSystem.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "entity_state", new[] { "detached", "unchanged", "deleted", "modified", "added" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "menu_type", new[] { "others", "main_course", "drinks", "dessert" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "order_status", new[] { "placed", "preparing", "completed", "rejected" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "payment_type", new[] { "cash", "qr_scan", "credit_card" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -521,19 +523,15 @@ namespace OrderingSystem.Infrastructure.Migrations
                 {
                     b.HasBaseType("OrderingSystem.Infrastructure.Databases.OrderingSystem.TblBaseSoftDelete");
 
+                    b.Property<string>("Instruction")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("instruction");
+
                     b.Property<Guid>("MenuId")
                         .HasColumnType("uuid")
                         .HasColumnName("menu_id");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("note");
-
-                    b.Property<OrderStatus>("Status")
-                        .HasColumnType("order_status")
-                        .HasColumnName("status");
 
                     b.Property<Guid>("TableId")
                         .HasColumnType("uuid")
