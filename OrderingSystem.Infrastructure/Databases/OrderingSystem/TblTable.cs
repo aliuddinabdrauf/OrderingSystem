@@ -10,6 +10,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
     {
         public int Number {  get; set; }
         public Guid OrderId { get; set; }
-        public ICollection<TblOrder> Orders { get; set; }
+        public ICollection<TblOrder> Orders { get; set; } = [];
     }
 }

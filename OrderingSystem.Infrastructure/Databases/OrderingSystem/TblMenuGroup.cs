@@ -10,6 +10,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public ICollection<TblMenu> Menus { get; set; }
+        public ICollection<TblMenu> Menus { get; set; } = [];
     }
 }

@@ -173,5 +173,15 @@ namespace OrderingSystem.WebApi.Controllers
             await menuService.DeleteMenuGroup(groupId, userId);
             return NoContent();
         }
+        [HttpGet]
+        [Route("{groupId}/menus")]
+        [EndpointName("Get Menus In The Group")]
+        [ProducesResponseType(typeof(List<MenuDto>), 200)]
+        [ProducesResponseType(typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
+        public async Task<IActionResult> GetMenusByMenuGroupId(Guid groupId)
+        {
+            var result = await menuService.GetMenusByGroup(groupId, false);
+            return Ok(result);
+        }
     }
 }

@@ -111,7 +111,7 @@ namespace OrderingSystem.Application.Services
         }
         public async Task<MenuGroupDto> UpdateMenuGroup(UpdateMenuGroupDto menuGroupDto, Guid groupId, Guid userId)
         {
-            var dbData = baseRepository.GetDataById<TblMenuGroup>(groupId);
+            var dbData = await baseRepository.GetDataById<TblMenuGroup>(groupId);
             var toUpdate = menuGroupDto.Adapt(dbData);
             baseRepository.UpdateData(toUpdate);
             await baseRepository.SaveChanges(userId);
