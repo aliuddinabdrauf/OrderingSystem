@@ -14,4 +14,6 @@ namespace OrderingSystem.Infrastructure.Dtos
         public string FullName = Name + Extension;
     }
     public record AddFileResultDto(Guid? Id, string Name, string Extension, bool IsSuccess = true);
+
+    public record SimpleFileDto(Guid Id, string Name, string Extension);
 }

@@ -87,9 +87,9 @@ namespace OrderingSystem.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(typeof(ResponseProblemDto),400, contentType: "application/problem+json")]
-        public async Task<IActionResult> UploadImages([FromForm] IFormFileCollection files)
+        public async Task<IActionResult> UploadImages([FromForm] IFormFileCollection images)
         {
-            var (result, status) = await menuService.UploadMenuImages(files);
+            var (result, status) = await menuService.UploadMenuImages(images);
             if (status == HttpMultiStatus.Success)
                 return Ok(result);
             else

@@ -51,7 +51,7 @@ namespace OrderingSystem.Infrastructure.Dtos
         public string Description { get; set; }
         public MenuStatus MenuStatus { get; set; }
         public MenuGroupDto? MenuGroup { get; set; }
-        public List<Guid> Images { get; set; }
+        public List<SimpleFileDto> Images { get; set; }
     }
 
     public class MenuByTypeDto

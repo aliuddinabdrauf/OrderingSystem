@@ -31,7 +31,7 @@ namespace OrderingSystem.Application.Services
         Task<MenuByTypeDto> GetMenusGroupedByTypes(bool? activeOnly);
         Task<MenuDto> UpdateMenu(UpdateMenuDto menuDto, Guid menuId, Guid userId);
         Task<MenuGroupDto> UpdateMenuGroup(UpdateMenuGroupDto menuGroupDto, Guid groupId, Guid userId);
-        Task<(List<AddFileResultDto>, HttpMultiStatus)> UploadMenuImages(IFormFileCollection files);
+        Task<(List<AddFileResultDto>, HttpMultiStatus)> UploadMenuImages(IFormFileCollection images);
     }
 
     public class MenuService(IBaseRepository baseRepository, IMenuRepository menuRepository, IFileService fileService, ILogger<MenuService> logger) : IMenuService
@@ -137,21 +137,21 @@ namespace OrderingSystem.Application.Services
             return result.Adapt(new List<MenuDto>());
         }
 
-        public async Task<(List<AddFileResultDto>, HttpMultiStatus)> UploadMenuImages(IFormFileCollection files)
+        public async Task<(List<AddFileResultDto>, HttpMultiStatus)> UploadMenuImages(IFormFileCollection images)
         {
             List<string> validExtensions = [".jpg", ".jpeg", ".png"];
-            if(files is null || !files.Any())
+            if(images is null || !images.Any())
                 throw new BadRequestException("No image to be uploaded");
-            if(files.Count > 5)
+            if(images.Count > 5)
                 throw new BadRequestException("Maximum of 5 images can be upload for a Menu");
-            if (files.Any(o => o.Length > 1000000))
+            if (images.Any(o => o.Length > 1000000))
                 throw new BadRequestException("Single file size must not exceed 1mb");
-            if (files.Any(o => !validExtensions.Contains(Path.GetExtension(o.FileName.ToLower()))))
+            if (images.Any(o => !validExtensions.Contains(Path.GetExtension(o.FileName.ToLower()))))
                 throw new NotValidMediaType($"File must be in [{string.Join(',',validExtensions)}] format");
-            if (files.Select(o => o.FileName).Distinct().Count() != files.Count)
+            if (images.Select(o => o.FileName).Distinct().Count() != images.Count)
                 throw new BadRequestException("Each file name must be unique");
             List<AddFileResultDto> result = [];
-            foreach(var file in files)
+            foreach(var file in images)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file.FileName);
                 var extension = Path.GetExtension(file.FileName);
