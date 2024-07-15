@@ -80,32 +80,21 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpPost]
         [Authorize(Roles = "ADMIN")]
-        [Route("upload/image")]
+        [Route("{menuId}/upload/image")]
         [ProducesResponseType(typeof(List<AddFileResultDto>), 200)]
         [ProducesResponseType(typeof(List<AddFileResultDto>), 207)]
         [RequestSizeLimit(1000000)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
         [ProducesResponseType(typeof(ResponseProblemDto),400, contentType: "application/problem+json")]
-        public async Task<IActionResult> UploadImages([FromForm] IFormFileCollection images)
+        public async Task<IActionResult> UploadImages(Guid menuId, [FromForm] IFormFileCollection images, [FromForm] List<Guid> existingImageIds)
         {
             var (result, status) = await menuService.UploadMenuImages(images);
+            await menuService.AssignImagesToMenu(menuId, result, existingImageIds);
             if (status == HttpMultiStatus.Success)
                 return Ok(result);
             else
                 return StatusCode(207, result);
-        }
-        [HttpPatch]
-        [Authorize(Roles ="ADMIN")]
-        [Route("{menuId}/asignImage")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
-        public async Task<IActionResult> AssignImagesToMenu(Guid menuId, List<Guid> imageIds)
-        {
-            await menuService.AssignImagesToMenu(menuId, imageIds);
-            return NoContent();
         }
     }
     [Route("api/menu/group")]

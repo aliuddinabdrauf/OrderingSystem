@@ -145,9 +145,9 @@ builder.Services.AddApplicationServices();
 
 builder.Services.AddHttpContextAccessor();
 
-//db table if map to list of guid, will automatically get the id
+//db map images
 TypeAdapterConfig<TblMenu, MenuDto>.NewConfig()
-    .Map(dest => dest.Images, src => src.MenuImages.Select(o => o.FileId));
+    .Map(dest => dest.Images, src => src.MenuImages.Select(o => o.Image));
 
 TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
 

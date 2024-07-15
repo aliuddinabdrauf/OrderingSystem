@@ -20,7 +20,7 @@ namespace OrderingSystem.Application.Services
     {
         Task<MenuDto> AddMenu(AddMenuDto menuDto, Guid userId);
         Task<MenuGroupDto> AddMenuGroup(AddMenuGroupDto addMenuGroup, Guid userId);
-        Task AssignImagesToMenu(Guid menuId, List<Guid> imageIds);
+        Task AssignImagesToMenu(Guid menuId, List<AddFileResultDto> newImages, List<Guid> existingImageIds);
         Task DeleteMenu(Guid menuId, Guid userId);
         Task DeleteMenuGroup(Guid groupId, Guid userId);
         Task<List<MenuGroupDto>> GetAllMenuGroup();
@@ -173,18 +173,20 @@ namespace OrderingSystem.Application.Services
             else
                 return (result, HttpMultiStatus.Success);
         }
-        public async Task AssignImagesToMenu(Guid menuId, List<Guid> imageIds)
+        public async Task AssignImagesToMenu(Guid menuId, List<AddFileResultDto> newImages, List<Guid> existingImageIds)
         {
+            var newImageIds = newImages.Where(o => o.IsSuccess).Select(o => o.Id.GetValueOrDefault()).ToList();
+            existingImageIds.AddRange(newImageIds);
             var imageFromDb = await baseRepository.GetAllDataWithCondition<TblMenuImage>(o => o.MenuId == menuId);
-            var toDelete = imageFromDb.Where(o => !imageIds.Contains(o.FileId));
-            var toUpdate = imageFromDb.Where(o => imageIds.Contains(o.FileId));
+            var toDelete = imageFromDb.Where(o => !existingImageIds.Contains(o.FileId));
+            var toUpdate = imageFromDb.Where(o => existingImageIds.Contains(o.FileId));
             foreach(var image in toUpdate)
             {
-                image.Order = imageIds.IndexOf(image.FileId) + 1;
+                image.Order = existingImageIds.IndexOf(image.FileId) + 1;
             }
             var toAdd = new List<TblMenuImage>();
             var order = 1;
-            foreach (var imageId in imageIds)
+            foreach (var imageId in existingImageIds)
             {
                 if(!toUpdate.Any(o => o.Id == imageId))
                 {
