@@ -16,6 +16,7 @@ namespace OrderingSystem.Application.Repositories
 {
     public interface IMenuRepository
     {
+        Task DeleteMenuImages(Guid menuId, IEnumerable<Guid> imageIds);
         Task<List<MenuDto>> GetAllMenu(bool? activeOnly);
         Task<MenuDto> GetMenuById(Guid menuId);
     }
@@ -36,6 +37,19 @@ namespace OrderingSystem.Application.Repositories
                query = query.Where(o => o.MenuStatus != MenuStatus.NotActive);
             var result = await query.ProjectToType<MenuDto>().ToListAsync();
             return result;
+        }
+        public async Task DeleteMenuImages(Guid menuId, IEnumerable<Guid> imageIds)
+        {
+            //delete relationship
+            var relationships = await context.TblMenuImage.Where(o => o.MenuId ==  menuId && imageIds.Contains(o.FileId)).ToListAsync();
+            context.TblMenuImage.RemoveRange(relationships);
+            //delete image file
+            List<TblFile> files = [];
+            foreach(var imageId in imageIds)
+            {
+                files.Add(new TblFile { Id = imageId });
+            }
+            context.TblFile.RemoveRange(files);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace OrderingSystem.WebApi.Controllers
     [ApiController]
     public class UserManagerController(RoleManager<IdentityRole<Guid>> roleManager, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
-        [HttpPut]
+        [HttpPost]
         [Route("role/add")]
         [ProducesResponseType(typeof(IdentityRole<Guid>), 200)]
         public async Task<IActionResult> AddRole(string roleName)
@@ -29,14 +29,14 @@ namespace OrderingSystem.WebApi.Controllers
             return Ok(role);
         }
         [HttpGet]
-        [Route("role/getAll")]
+        [Route("role/all")]
         [ProducesResponseType(typeof(List<IdentityRole<Guid>>), 200)]
         public  IActionResult GetAllRole()
         {
            return Ok(roleManager.Roles.ToList());
         }
         [HttpDelete]
-        [Route("role/delete/{roleId}")]
+        [Route("role/{roleId}")]
         public async Task<IActionResult> DeleteRole(Guid roleId)
         {
           var result =  await roleManager.DeleteAsync(new IdentityRole<Guid> { Id = roleId });
@@ -49,7 +49,7 @@ namespace OrderingSystem.WebApi.Controllers
             }
             return NoContent();
         }
-        [HttpPost]
+        [HttpPatch]
         [Route("role/assign/{userId}")]
         public async Task<IActionResult> AssignRolesToUser(Guid userId, [FromBody] List<string> roleName)
         {
@@ -74,7 +74,7 @@ namespace OrderingSystem.WebApi.Controllers
             }
             return NoContent();
         }
-        [HttpPut]
+        [HttpPost]
         [Authorize]
         [Route("user/add")]
         public async Task<IActionResult> AddUser([FromBody] AddUserDto addUser)

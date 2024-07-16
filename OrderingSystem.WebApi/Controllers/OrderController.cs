@@ -12,7 +12,7 @@ namespace OrderingSystem.WebApi.Controllers
     [ApiController]
     public class OrderController(IOrderService orderService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
-        [HttpPut]
+        [HttpPost]
         [Route("create/{tableId}")]
         [ProducesResponseType(204)]
         public async Task<IActionResult> PlaceOrder(Guid tableId, [FromBody]List<PlaceOrderDto> orders)

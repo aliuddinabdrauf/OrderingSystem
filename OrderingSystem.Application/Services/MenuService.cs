@@ -63,8 +63,13 @@ namespace OrderingSystem.Application.Services
         }
         public async Task DeleteMenu(Guid menuId, Guid userId)
         {
+            using var t = await baseRepository.StartTransaction();
+            var menuData = await menuRepository.GetMenuById(menuId);
+            var imageIds = menuData.Images.Select(x => x.Id.GetValueOrDefault());
+            await menuRepository.DeleteMenuImages(menuId, imageIds);
             await baseRepository.DeleteDataById<TblMenu>(menuId);
             await baseRepository.SaveChanges(userId);
+            await baseRepository.CommitTransaction();
         }
 
         public async Task<MenuByTypeDto> GetMenusGroupedByTypes(bool? activeOnly)
@@ -140,38 +145,43 @@ namespace OrderingSystem.Application.Services
         public async Task<(List<AddFileResultDto>, HttpMultiStatus)> UploadMenuImages(IFormFileCollection images)
         {
             List<string> validExtensions = [".jpg", ".jpeg", ".png"];
-            if(images is null || !images.Any())
-                throw new BadRequestException("No image to be uploaded");
-            if(images.Count > 5)
-                throw new BadRequestException("Maximum of 5 images can be upload for a Menu");
-            if (images.Any(o => o.Length > 1000000))
-                throw new BadRequestException("Single file size must not exceed 1mb");
-            if (images.Any(o => !validExtensions.Contains(Path.GetExtension(o.FileName.ToLower()))))
-                throw new NotValidMediaType($"File must be in [{string.Join(',',validExtensions)}] format");
-            if (images.Select(o => o.FileName).Distinct().Count() != images.Count)
-                throw new BadRequestException("Each file name must be unique");
             List<AddFileResultDto> result = [];
-            foreach(var file in images)
+            if (images is not null  && images.Any())
             {
-                var fileName = Path.GetFileNameWithoutExtension(file.FileName);
-                var extension = Path.GetExtension(file.FileName);
-                try
+                if (images.Count > 5)
+                    throw new BadRequestException("Maximum of 5 images can be upload for a Menu");
+                if (images.Any(o => o.Length > 1000000))
+                    throw new BadRequestException("Single file size must not exceed 1mb");
+                if (images.Any(o => !validExtensions.Contains(Path.GetExtension(o.FileName.ToLower()))))
+                    throw new NotValidMediaType($"File must be in [{string.Join(',', validExtensions)}] format");
+                if (images.Select(o => o.FileName).Distinct().Count() != images.Count)
+                    throw new BadRequestException("Each file name must be unique");
+                foreach (var file in images)
                 {
-                    var toSave = new AddFileDto(fileName, extension,  file.ContentType, file.ToByteArray(), true);
-                    result.Add(await fileService.AddFile(toSave));
+                    var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                    var extension = Path.GetExtension(file.FileName);
+                    try
+                    {
+                        var toSave = new AddFileDto(fileName, extension, file.ContentType, file.ToByteArray(), true);
+                        result.Add(await fileService.AddFile(toSave));
+                    }
+                    catch (Exception e)
+                    {
+                        result.Add(new AddFileResultDto(null, fileName, extension, false));
+                        logger.LogError(AppLogEvent.RepositoryError, e, "File not able to be save in db");
+                    }
                 }
-                catch(Exception e)
-                {
-                    result.Add(new AddFileResultDto(null, fileName, extension, false));
-                    logger.LogError(AppLogEvent.RepositoryError, e, "File not able to be save in db");
-                }
+                if (result.All(o => !o.IsSuccess))
+                    throw new NoDataUpdatedException("No Images Had been save");
+                else if (result.Any(o => !o.IsSuccess))
+                    return (result, HttpMultiStatus.Multi);
+                else
+                    return (result, HttpMultiStatus.Success);
             }
-            if (result.All(o => !o.IsSuccess))
-                throw new NoDataUpdatedException("No Images Had been save");
-            else if(result.Any(o => !o.IsSuccess))
-                return (result, HttpMultiStatus.Multi);
             else
-                return (result, HttpMultiStatus.Success);
+            {
+                return (result,  HttpMultiStatus.Success);
+            }
         }
         public async Task AssignImagesToMenu(Guid menuId, List<AddFileResultDto> newImages, List<Guid> existingImageIds)
         {
@@ -188,7 +198,7 @@ namespace OrderingSystem.Application.Services
             var order = 1;
             foreach (var imageId in existingImageIds)
             {
-                if(!toUpdate.Any(o => o.Id == imageId))
+                if(!toUpdate.Any(o => o.FileId == imageId))
                 {
                     toAdd.Add(new()
                     {

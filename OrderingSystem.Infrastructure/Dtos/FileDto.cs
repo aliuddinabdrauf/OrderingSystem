@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mapster;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,10 +11,19 @@ namespace OrderingSystem.Infrastructure.Dtos
     {
         public long FileSize = Data.LongLength;
     }
-    public record FileDto(string Name, string Extension, string ContentType, byte[] Data) { 
-        public string FullName = Name + Extension;
+    public record FileDto(string Name, string Extension, string ContentType, byte[] Data)
+    {
+        [AdaptIgnore(MemberSide.Destination)]
+        public string FullName { get { return Name + Extension; } }
     }
     public record AddFileResultDto(Guid? Id, string Name, string Extension, bool IsSuccess = true);
 
-    public record SimpleFileDto(Guid Id, string Name, string Extension);
+    public class SimpleFileDto
+    {
+        public Guid? Id { get; set; }
+        public string Name { get; set; }
+        public string Extension { get; set; }
+        public string FullName { get { return Name + Extension; } }
+    }
+
 }

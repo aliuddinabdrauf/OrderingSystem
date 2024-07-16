@@ -16,7 +16,7 @@ namespace OrderingSystem.WebApi.Controllers
     public class MenuController(IMenuService menuService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
         [Authorize(Roles = "ADMIN")]
-        [HttpPut]
+        [HttpPost]
         [ProducesResponseType(typeof(MenuDto), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
@@ -53,7 +53,7 @@ namespace OrderingSystem.WebApi.Controllers
             return Ok(result);
         }
         [Authorize(Roles = "ADMIN")]
-        [HttpPatch]
+        [HttpPut]
         [ProducesResponseType(type: typeof(MenuDto), 200)]
         [ProducesResponseType(type: typeof(ResponseProblemDto), 404, contentType: "application/problem+json")]
         [ProducesResponseType(401)]
@@ -121,7 +121,7 @@ namespace OrderingSystem.WebApi.Controllers
             var result = await menuService.GetMenuGroupById(groupId);
             return Ok(result);
         }
-        [HttpPut]
+        [HttpPost]
         [Authorize(Roles ="ADMIN")]
         [Route("add")]
         [EndpointName("Add Menu Group")]
@@ -134,9 +134,9 @@ namespace OrderingSystem.WebApi.Controllers
             var result = await menuService.AddMenuGroup(addMenuGroup, userId);
             return Ok(result);
         }
-        [HttpPatch]
+        [HttpPut]
         [Authorize(Roles = "ADMIN")]
-        [Route("update/{groupId}")]
+        [Route("{groupId}")]
         [EndpointName("Update Menu Group")]
         [ProducesResponseType(typeof(MenuGroupDto), 200)]
         [ProducesResponseType(401)]
@@ -150,7 +150,7 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpDelete]
         [Authorize(Roles = "ADMIN")]
-        [Route("delete/{groupId}")]
+        [Route("{groupId}")]
         [EndpointName("Delete Menu Group")]
         [ProducesResponseType(204)]
         [ProducesResponseType(401)]
