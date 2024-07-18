@@ -25,7 +25,6 @@ namespace OrderingSystem.WebApi.Controllers
         [Route("{orderId}/{orderStatus}")]
         [Authorize]
         [ProducesResponseType(204)]
-        [ProducesResponseType(typeof(ResponseProblemDto), 404)]
         public async Task<IActionResult> UpdateOrderStatus(Guid orderId, OrderStatus orderStatus)
         {
             Guid userId = new Guid(userManager.GetUserId(User));

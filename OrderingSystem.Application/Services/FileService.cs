@@ -21,11 +21,10 @@ namespace OrderingSystem.Application.Services
 
     public class FileService(IBaseRepository baseRepository, IFileRepository fileRepository) : IFileService
     {
-        private const long maxSize = 10000000;
         public async Task<AddFileResultDto> AddFile(AddFileDto addFile)
         {
-            if (addFile.FileSize > maxSize)
-                throw new BadRequestException("File must not exceed 10mb in size");
+            if (addFile.FileSize > FileSize.MaxSize)
+                throw new BadRequestException("Saiz fail tidak boleh melebihi 10mb");
             var toSave = addFile.Adapt<TblFile>();
             baseRepository.AddData(toSave);
             await baseRepository.SaveChanges();
@@ -39,8 +38,8 @@ namespace OrderingSystem.Application.Services
         /// <exception cref="BadRequestException"></exception>
         public async Task<List<AddFileResultDto>> AddFiles(List<AddFileDto> addFiles)
         {
-            if (addFiles.Any(o => o.FileSize > maxSize))
-                throw new BadRequestException("File must not exceed 10mb in size");
+            if (addFiles.Any(o => o.FileSize > FileSize.MaxSize))
+                throw new BadRequestException("Saiz fail tidak boleh melebihi 10mb");
             var toSave = addFiles.Adapt<List<TblFile>>();
             baseRepository.AddDataBatch(toSave);
             await baseRepository.SaveChanges();

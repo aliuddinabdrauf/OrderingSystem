@@ -45,8 +45,8 @@ namespace OrderingSystem.WebApi.Middlewares
                 }
                 else
                 {
-                    error.Title = "Something wrong happened";
-                    error.Error = "Please contact administrator for help.";
+                    error.Title = "Sesuatu yang tak dijangka telah berlaku";
+                    error.Error = "Sila hubungi pihak pentadbir bagi mendapatkan bantuan.";
                 }
             }
             context.Response.ContentType = "application/problem+json";

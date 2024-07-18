@@ -11,7 +11,7 @@ namespace OrderingSystem.Infrastructure
 
     public class RecordNotFoundException : BadHttpRequestException
     {
-        public RecordNotFoundException(string message = "No record found!", object? identifier = null) : base(message, 404)
+        public RecordNotFoundException(string message = "Tiada rekod ditemui", object? identifier = null) : base(message, 404)
         {
             if (identifier is not null)
                 Data.Add("identifier", identifier);
@@ -26,5 +26,5 @@ namespace OrderingSystem.Infrastructure
     public class NoDataUpdatedException(string message) : BadHttpRequestException(message, 422);
     public class RecordAlreadyExistException(string message): BadHttpRequestException(message, 409);
     public class NotValidMediaType(string message): BadHttpRequestException(message, 415);
-    public class OperationAbortedException(string message ="Operation canceled, Something wrong happened. Please contact admin for further assistant.") : BadHttpRequestException(message, 500);
+    public class OperationAbortedException(string message ="Sesuatu yang tidak dijangaka telah berlaku menyebabkan operasi dibatalkan. Sila hubungi pentadbir untuk bantuan") : BadHttpRequestException(message, 500);
 }

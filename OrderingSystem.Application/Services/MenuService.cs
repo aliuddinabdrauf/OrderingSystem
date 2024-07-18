@@ -149,13 +149,13 @@ namespace OrderingSystem.Application.Services
             if (images is not null  && images.Any())
             {
                 if (images.Count > 5)
-                    throw new BadRequestException("Maximum of 5 images can be upload for a Menu");
-                if (images.Any(o => o.Length > 1000000))
-                    throw new BadRequestException("Single file size must not exceed 1mb");
+                    throw new BadRequestException("Had maksimum untuk jumlah imej bagi satu menu adalah 5 imej");
+                if (images.Any(o => o.Length > FileSize.MaxMenuImageSize))
+                    throw new BadRequestException("Saiz satu fail mesti tidak melebihi 1mb");
                 if (images.Any(o => !validExtensions.Contains(Path.GetExtension(o.FileName.ToLower()))))
-                    throw new NotValidMediaType($"File must be in [{string.Join(',', validExtensions)}] format");
+                    throw new NotValidMediaType($"Fail mesti di dalam format [{string.Join(',', validExtensions)}]");
                 if (images.Select(o => o.FileName).Distinct().Count() != images.Count)
-                    throw new BadRequestException("Each file name must be unique");
+                    throw new BadRequestException("Setiap nama imej hendaklah berbeza");
                 foreach (var file in images)
                 {
                     var fileName = Path.GetFileNameWithoutExtension(file.FileName);
@@ -168,11 +168,11 @@ namespace OrderingSystem.Application.Services
                     catch (Exception e)
                     {
                         result.Add(new AddFileResultDto(null, fileName, extension, false));
-                        logger.LogError(AppLogEvent.RepositoryError, e, "File not able to be save in db");
+                        logger.LogError(AppLogEvent.RepositoryError, e, "Fail tidak dapat disimpan di dalam db");
                     }
                 }
                 if (result.All(o => !o.IsSuccess))
-                    throw new NoDataUpdatedException("No Images Had been save");
+                    throw new NoDataUpdatedException("Tiada imej disimpan");
                 else if (result.Any(o => !o.IsSuccess))
                     return (result, HttpMultiStatus.Multi);
                 else
@@ -221,7 +221,7 @@ namespace OrderingSystem.Application.Services
             }
             catch(Exception ex)
             {
-                logger.LogError(ex, "Failed to map images to the menu");
+                logger.LogError(ex, "Pemadanan imej ke menu gagal");
                 throw new OperationAbortedException();
             }
         }

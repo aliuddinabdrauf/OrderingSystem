@@ -12,9 +12,9 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public Guid Id { get; set; }
         public Guid ActorId { get; set; }
         public EntityState Action { get; set; }
-        public string TableName { get; set; }
+        public string TableName { get; set; } = null!;
         public Guid TableId { get; set; }
         public DateTimeOffset ActionTimestamp { get; set; }
-        public string Data { get; set; }
+        public string Data { get; set; } = null!;
     }
 }

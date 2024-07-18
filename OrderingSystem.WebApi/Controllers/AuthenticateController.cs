@@ -13,15 +13,15 @@ namespace OrderingSystem.WebApi.Controllers
     [ApiController]
     public class AuthenticateController(
             UserManager<IdentityUser<Guid>> userManager,
-            RoleManager<IdentityRole<Guid>> roleManager,
             IConfiguration configuration) : ControllerBase
     {
         [HttpPost]
         [Route("login")]
+        [ProducesResponseType(typeof(SuccessLoginDto), 200)]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var user = await userManager.FindByEmailAsync(model.Email);
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+            if (user is not null && await userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRoles = await userManager.GetRolesAsync(user);
                 var authClaims = new List<Claim>
@@ -35,11 +35,7 @@ namespace OrderingSystem.WebApi.Controllers
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
                 var token = GetToken(authClaims);
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
-                });
+                return Ok(new SuccessLoginDto(new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo));
             }
             return Unauthorized();
         }

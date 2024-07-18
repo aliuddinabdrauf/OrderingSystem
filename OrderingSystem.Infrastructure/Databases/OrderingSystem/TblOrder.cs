@@ -9,12 +9,12 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
     public class TblOrder : TblBaseSoftDelete
     {
         public int Total { get; set; }
-        public string Note { get; set; }
+        public string Note { get; set; } = null!;
         public OrderStatus Status { get; set; }
         public Guid MenuId { get; set; }
-        public TblMenu Menu { get; set; }
+        public TblMenu Menu { get; init; } = null!;
         public Guid TableId { get; set; }
-        public TblTable Table { get; set; }
-        public TblOrderToReciept OrderToReciept { get; set; }
+        public TblTable Table { get; init; } = null!;
+        public TblOrderToReciept OrderToReciept { get; init; } = null!;
     }
 }

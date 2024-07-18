@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 
 namespace OrderingSystem.Infrastructure.Dtos
 {
-    public class LoginDto
+    public class AddTableDto
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        [Required]
-        public string Password { get; set; }
+        [StringLength(10)]
+        public string Name { get; set; }
     }
-    public record SuccessLoginDto(string token, DateTime expiration);
+    public class UpdateTableDto:AddTableDto
+    {
+
+    }
+    public record TableDto(Guid Id,  string Name);
 }

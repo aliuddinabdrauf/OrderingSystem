@@ -37,6 +37,7 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpDelete]
         [Route("role/{roleId}")]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteRole(Guid roleId)
         {
           var result =  await roleManager.DeleteAsync(new IdentityRole<Guid> { Id = roleId });
@@ -51,6 +52,7 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpPatch]
         [Route("role/assign/{userId}")]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> AssignRolesToUser(Guid userId, [FromBody] List<string> roleName)
         {
             var user = await userManager.FindByIdAsync(userId.ToString());
@@ -77,6 +79,7 @@ namespace OrderingSystem.WebApi.Controllers
         [HttpPost]
         [Authorize]
         [Route("user/add")]
+        [ProducesResponseType(typeof(UserCreatedDto), 200)]
         public async Task<IActionResult> AddUser([FromBody] AddUserDto addUser)
         {
             var userExists = await userManager.FindByEmailAsync(addUser.Email);
@@ -112,6 +115,7 @@ namespace OrderingSystem.WebApi.Controllers
         [HttpDelete]
         [Authorize]
         [Route("user/delete/{userId}")]
+        [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
             var user = await userManager.FindByIdAsync(userId.ToString());

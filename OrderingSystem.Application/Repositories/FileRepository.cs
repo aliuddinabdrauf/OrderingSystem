@@ -22,7 +22,7 @@ namespace OrderingSystem.Application.Repositories
         {
             var data = await context.TblFile.AsNoTracking().Where(o => o.Id == fileId && o.IsPublic)
                 .Select(o => new FileDto(o.Name, o.Extension, o.ContentType, o.Data))
-                .SingleOrDefaultAsync() ?? throw new RecordNotFoundException($"No record found for id = '{fileId}'");
+                .SingleOrDefaultAsync() ?? throw new RecordNotFoundException($"Tiadak rekod ditemui untuk id = '{fileId}'");
             return data;
         }
     }

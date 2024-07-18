@@ -69,7 +69,7 @@ namespace OrderingSystem.Application.Repositories
         public async Task<T> GetDataById<T>(Guid id) where T : class
         {
             var result = await context.Set<T>().FindAsync(id);
-            return result is null ? throw new RecordNotFoundException($"No record found for id = '{id}'") : result;
+            return result is null ? throw new RecordNotFoundException($"Tiada rekod dijumpai untuk id = '{id}'") : result;
         }
         public async Task<List<T>> GetAllDataWithCondition<T>(Expression<Func<T, bool>> predicate, bool isTracked = true) where T : class
         {
@@ -105,7 +105,7 @@ namespace OrderingSystem.Application.Repositories
         }
         public async Task DeleteDataById<T>(Guid guid) where T : class
         {
-            var toRemove = await context.Set<T>().FindAsync(guid) ?? throw new RecordNotFoundException("No data found to be deleted");
+            var toRemove = await context.Set<T>().FindAsync(guid) ?? throw new RecordNotFoundException("Tiada rekod ditemui untuk dipadam");
             context.Set<T>().Remove(toRemove);
         }
         /// <summary>
@@ -122,7 +122,7 @@ namespace OrderingSystem.Application.Repositories
             var r = await context.Set<T>().Where(x => x.Id == id)
                 .ExecuteUpdateAsyncCustom(setter => setter, userId, true);
             if (r == 0)
-                throw new RecordNotFoundException($"No record found with id '{id}' to be deleted");
+                throw new RecordNotFoundException($"Tiada rekod dengan id '{id}' untuk dipadam");
         }
         public void DeleteDataBatch<T>(IEnumerable<T> entities) where T : class
         {

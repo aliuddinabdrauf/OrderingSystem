@@ -16,6 +16,7 @@ namespace OrderingSystem.Application
             services.AddScoped<IMenuService, MenuService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<ITableService, TableService>();
         }
     }
 }

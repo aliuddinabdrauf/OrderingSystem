@@ -10,7 +10,7 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
     {
         public double Total {  get; set; }
         public PaymentType PaymentType { get; set; }
-        public string TransactionId { get; set; }
-        public ICollection<TblOrderToReciept> OrderToReciepts { get; set; } = [];
+        public string TransactionId { get; set; } = null!;
+        public ICollection<TblOrderToReciept> OrderToReciepts { get; init; } = null!;
     }
 }

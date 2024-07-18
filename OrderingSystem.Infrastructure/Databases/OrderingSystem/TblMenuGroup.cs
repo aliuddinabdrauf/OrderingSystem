@@ -8,8 +8,8 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
 {
     public class TblMenuGroup: TblBaseSoftDelete
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public ICollection<TblMenu> Menus { get; set; } = [];
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public ICollection<TblMenu> Menus { get; init; } = null!;
     }
 }
