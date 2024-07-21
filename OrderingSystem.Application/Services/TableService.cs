@@ -2,6 +2,7 @@
 using OrderingSystem.Application.Repositories;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 using OrderingSystem.Infrastructure.Dtos;
+using QRCoder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace OrderingSystem.Application.Services
     public interface ITableService
     {
         Task<TableDto> AddTable(AddTableDto table);
+         FileDto CreateTableQrCode(Guid tableId, string link);
         Task DeleteTable(Guid tableId);
         Task<List<TableDto>> GetAllTables();
         Task<TableDto> GetTableById(Guid tableId);
@@ -24,7 +26,7 @@ namespace OrderingSystem.Application.Services
         public async Task<TableDto> AddTable(AddTableDto table)
         {
             var toSave = table.Adapt<TblTable>();
-            baseRepository.AddData(table);
+            baseRepository.AddData(toSave);
             await baseRepository.SaveChanges();
             return toSave.Adapt<TableDto>();
         }
@@ -47,9 +49,17 @@ namespace OrderingSystem.Application.Services
         }
         public async Task DeleteTable(Guid tableId)
         {
-            var toDelete = new TblTable { Id = tableId };
+            var toDelete = await baseRepository.GetDataById<TblTable>(tableId);
             baseRepository.DeleteData(toDelete);
             await baseRepository.SaveChanges();
+        }
+        public FileDto CreateTableQrCode(Guid tableId, string link)
+        {
+            using QRCodeGenerator qrGenerator = new();
+            using QRCodeData qrCodeData = qrGenerator.CreateQrCode(link, QRCodeGenerator.ECCLevel.Q);
+            using PngByteQRCode qrCode = new(qrCodeData);
+            byte[] qrCodeImage = qrCode.GetGraphic(50);
+            return new FileDto($"{tableId}", ".png", "image/png", qrCodeImage); 
         }
     }
 }

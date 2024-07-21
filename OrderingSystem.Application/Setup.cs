@@ -12,11 +12,13 @@ namespace OrderingSystem.Application
             services.AddScoped<IMenuRepository, MenuRepository>();
             services.AddScoped<IFileRepository, FileRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IReceiptRepository, ReceiptRepository>();
 
             services.AddScoped<IMenuService, MenuService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ITableService, TableService>();
+            services.AddScoped<IReceiptService, ReceiptService>();
         }
     }
 }

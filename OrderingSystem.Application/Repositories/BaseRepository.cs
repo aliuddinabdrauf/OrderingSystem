@@ -26,6 +26,7 @@ namespace OrderingSystem.Application.Repositories
         Task<List<T>> GetAllData<T>(bool isTracked = true) where T : class;
         Task<List<T>> GetAllDataWithCondition<T>(Expression<Func<T, bool>> predicate, bool isTracked = true) where T : class;
         Task<T> GetDataById<T>(Guid id) where T : class;
+        Task<bool> IsExistAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
         Task RollbackTransaction();
         Task<int> SaveChanges(Guid? userId = null);
         Task<IDbContextTransaction> StartTransaction();
@@ -102,6 +103,11 @@ namespace OrderingSystem.Application.Repositories
         public void DeleteData<T>(T entity) where T : class
         {
             context.Set<T>().Remove(entity);
+        }
+        public async Task<bool> IsExistAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+        {
+            var count = await context.Set<T>().CountAsync(predicate);
+            return count != 0;
         }
         public async Task DeleteDataById<T>(Guid guid) where T : class
         {

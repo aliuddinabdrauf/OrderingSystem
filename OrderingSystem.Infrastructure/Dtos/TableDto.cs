@@ -11,11 +11,11 @@ namespace OrderingSystem.Infrastructure.Dtos
     {
         [Required]
         [StringLength(10)]
-        public string Name { get; set; }
+        public string Number { get; set; }
     }
     public class UpdateTableDto:AddTableDto
     {
 
     }
-    public record TableDto(Guid Id,  string Name);
+    public record TableDto(Guid Id,  string Number);
 }

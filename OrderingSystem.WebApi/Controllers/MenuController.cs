@@ -36,7 +36,7 @@ namespace OrderingSystem.WebApi.Controllers
         }
         [HttpGet]
         [ProducesResponseType(type: typeof(MenuByTypeDto), 200)]
-        [Route("all/grupByType")]
+        [Route("all/groupByType")]
         public async Task<IActionResult> GetMenusGroupedByTypes(bool? activeOnly)
         {
             var result = await menuService.GetMenusGroupedByTypes(activeOnly);

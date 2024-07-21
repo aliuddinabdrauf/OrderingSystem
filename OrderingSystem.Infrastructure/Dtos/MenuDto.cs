@@ -56,9 +56,9 @@ namespace OrderingSystem.Infrastructure.Dtos
 
     public class MenuByTypeDto
     {
-        public List<MenuDto> Others { get; set; }
-        public List<MenuDto> MainCourse { get; set; }
-        public List<MenuDto> Drinks { get; set; }
-        public List<MenuDto> Desert { get; set; }
+        public List<MenuDto> Others { get; set; } = [];
+        public List<MenuDto> MainCourse { get; set; } = [];
+        public List<MenuDto> Drinks { get; set; } = [];
+        public List<MenuDto> Dessert { get; set; } = [];
     }
 }

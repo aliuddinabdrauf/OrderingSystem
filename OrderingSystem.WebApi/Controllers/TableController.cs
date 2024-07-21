@@ -4,18 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using OrderingSystem.Application.Services;
 using OrderingSystem.Infrastructure;
 using OrderingSystem.Infrastructure.Dtos;
+using System.ComponentModel.DataAnnotations;
 
 namespace OrderingSystem.WebApi.Controllers
 {
     [Route("api/table")]
     [ApiController]
-    public class TableController (ITableService tableService) : ControllerBase
+    public class TableController(ITableService tableService) : ControllerBase
     {
         [Authorize(Roles = UserRole.Admin)]
         [HttpPost]
         [ProducesResponseType(typeof(TableDto), 200)]
         [Route("add")]
-        public async Task<IActionResult> AddTable([FromBody]AddTableDto addTable)
+        public async Task<IActionResult> AddTable([FromBody] AddTableDto addTable)
         {
             var result = await tableService.AddTable(addTable);
             return Ok(result);
@@ -52,6 +53,15 @@ namespace OrderingSystem.WebApi.Controllers
         {
             await tableService.DeleteTable(tableId);
             return NoContent();
+        }
+        [HttpGet]
+        [Authorize]
+        [Route("{tableId}/qrcode")]
+        [ProducesResponseType(200)]
+        public IActionResult GetTableQrCode(Guid tableId, [Required]string link)
+        {
+            var file = tableService.CreateTableQrCode(tableId, link);
+            return File(file.Data, file.ContentType, fileDownloadName:  file.FullName);
         }
     }
 }

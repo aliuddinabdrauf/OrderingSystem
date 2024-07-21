@@ -88,7 +88,7 @@ namespace OrderingSystem.Application.Services
                         result.MainCourse = [.. menu];
                         break;
                     case MenuType.Dessert:
-                        result.Desert = [.. menu];
+                        result.Dessert = [.. menu];
                         break;
                     case MenuType.Drinks:
                         result.Drinks = [.. menu];

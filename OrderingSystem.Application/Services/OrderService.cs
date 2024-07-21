@@ -13,6 +13,7 @@ namespace OrderingSystem.Application.Services
 {
     public interface IOrderService
     {
+        Task<bool> AllOrderIsValidToComplete(List<Guid> orderIds);
         Task<List<OrderDto>> GetActiveTableOrder(Guid tableId);
         Task PlaceOrder(Guid tableId, List<PlaceOrderDto> orders);
         Task UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, Guid userId);
@@ -40,6 +41,22 @@ namespace OrderingSystem.Application.Services
             var toUpdate = await baseRepository.GetDataById<TblOrder>(orderId);
             toUpdate.Status = orderStatus;
             await baseRepository.SaveChanges(userId);
+        }
+        public async Task<TableOrderSummaryDto> GetTableOrderSummary(Guid tableId)
+        {
+            var result = await orderRepository.GetTableOrderSummary(tableId);
+            return result;
+        }
+        public async Task<bool> AllOrderIsValidToComplete(List<Guid> orderIds)
+        {
+            if(orderIds.Count == 0) return false;
+            foreach (var orderId in orderIds)
+            {
+                var valid = await baseRepository.IsExistAsync<TblOrder>(o => o.Id == orderId && o.Status != OrderStatus.Paid && o.Status != OrderStatus.Rejected);
+                if(!valid)
+                    return false;
+            }
+            return true;
         }
     }
 }

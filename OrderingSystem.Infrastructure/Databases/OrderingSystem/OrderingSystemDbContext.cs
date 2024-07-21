@@ -21,13 +21,14 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         protected virtual DbSet<TblBaseSoftDelete> TblBaseSoftDelete {  get; set; }
         public virtual DbSet<TblMenu> TblMenu { get; set; }
         public virtual DbSet<TblOrder> TblOrder { get; set; }
-        public virtual DbSet<TblReciept> TblPayment { get; set; }
+        public virtual DbSet<TblReceipt> TblPayment { get; set; }
         public virtual DbSet<TblTable> TblTable { get; set; }
         public virtual DbSet<TblMenuGroup> TblMenuGroup { get; set; }
-        public virtual DbSet<TblOrderToReciept> TblOrderToReciept { get; set; }
+        public virtual DbSet<TblOrderToReceipt> TblOrderToReceipt { get; set; }
         public virtual DbSet<TblAuditTrail> TblAuditTrail { get; set; }
         public virtual DbSet<TblFile> TblFile { get; set; }
         public virtual DbSet<TblMenuImage> TblMenuImage { get; set; }
+        public virtual DbSet<TblReceipt> TblReceipt { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -74,17 +75,18 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
                 entity.HasOne(e => e.Menu).WithMany(e => e.Orders)
                 .HasForeignKey(e => e.MenuId)
                 .OnDelete(DeleteBehavior.NoAction);
-                entity.HasOne(e => e.OrderToReciept).WithOne(e => e.Order)
-                .HasForeignKey<TblOrderToReciept>(e => e.OrderId);
+                entity.HasOne(e => e.OrderToReceipt).WithOne(e => e.Order)
+                .HasForeignKey<TblOrderToReceipt>(e => e.OrderId);
                 entity.HasOne(e => e.Table).WithMany(e => e.Orders)
                 .HasForeignKey(e => e.TableId)
                 .OnDelete(DeleteBehavior.NoAction);
             });
-            modelBuilder.Entity<TblReciept>(entity =>
+            modelBuilder.Entity<TblReceipt>(entity =>
             {
-                entity.HasMany(e => e.OrderToReciepts).WithOne(e => e.Reciept)
-                .HasForeignKey(e => e.RecieptId)
+                entity.HasMany(e => e.OrderToReceipts).WithOne(e => e.Receipt)
+                .HasForeignKey(e => e.ReceiptId)
                 .OnDelete(DeleteBehavior.NoAction);
+                entity.Property(e => e.TransactionId).HasMaxLength(50);
             });
             modelBuilder.Entity<TblAuditTrail>(entity =>
             {
@@ -106,6 +108,10 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
                 entity.HasOne(e => e.Image).WithMany(e => e.MenuImages)
                 .HasForeignKey(e => e.FileId)
                 .OnDelete(DeleteBehavior.NoAction);
+            });
+            modelBuilder.Entity<TblTable>(entity =>
+            {
+                entity.Property(e => e.Number).HasMaxLength(10);
             });
         }
     }

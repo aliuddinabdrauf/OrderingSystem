@@ -15,6 +15,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public TblMenu Menu { get; init; } = null!;
         public Guid TableId { get; set; }
         public TblTable Table { get; init; } = null!;
-        public TblOrderToReciept OrderToReciept { get; init; } = null!;
+        public TblOrderToReceipt OrderToReceipt { get; init; } = null!;
     }
 }

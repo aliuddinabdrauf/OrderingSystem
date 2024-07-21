@@ -13,9 +13,9 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public double Price { get; set; }
         public string Description { get; set; } = null!;
         public MenuStatus MenuStatus { get; set; }
-        public ICollection<TblOrder> Orders { get; init; } = null!;
+        public ICollection<TblOrder> Orders { get; init; } = [];
         public Guid? MenuGroupId { get; set; }
         public TblMenuGroup? MenuGroup { get; init; } = null!;
-        public ICollection<TblMenuImage> MenuImages { get; init; } = null!;
+        public ICollection<TblMenuImage> MenuImages { get; init; } = [];
     }
 }
