@@ -14,6 +14,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public byte[] Data { get; set; } = null!;
         public long FileSize { get; set; }
         public bool IsPublic { get; set; }
-        public ICollection<TblMenuImage> MenuImages { get; init; } = null!;
+        public ICollection<TblMenuImage> MenuImages { get; init; } = [];
     }
 }

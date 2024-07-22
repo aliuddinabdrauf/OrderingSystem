@@ -9,6 +9,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
     public class TblTable: TblBaseSoftDelete
     {
         public string Number { get; set; } = null!;
-        public ICollection<TblOrder> Orders { get; init; } = null!;
+        public ICollection<TblOrder> Orders { get; init; } = [];
     }
 }

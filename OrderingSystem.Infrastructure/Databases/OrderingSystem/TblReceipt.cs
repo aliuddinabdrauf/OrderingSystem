@@ -11,6 +11,6 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
         public double Total {  get; set; }
         public PaymentType PaymentType { get; set; }
         public string TransactionId { get; set; } = null!;
-        public ICollection<TblOrderToReceipt> OrderToReceipts { get; init; } = null!;
+        public ICollection<TblOrderToReceipt> OrderToReceipts { get; init; } = [];
     }
 }
