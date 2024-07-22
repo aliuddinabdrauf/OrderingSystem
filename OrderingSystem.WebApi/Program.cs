@@ -87,6 +87,7 @@ builder.Services.AddDbContext<OrderingSystemDbContext>(options =>
 //enable authorization
 builder.Services.AddAuthorization();
 
+//add authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
