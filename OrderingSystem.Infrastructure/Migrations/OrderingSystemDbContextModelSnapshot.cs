@@ -488,8 +488,7 @@ namespace OrderingSystem.Infrastructure.Migrations
 
                     b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("ix_tbl_menu_name")
-                        .HasFilter("is_deleted = false");
+                        .HasDatabaseName("ix_tbl_menu_name");
 
                     b.ToTable("tbl_menu", (string)null);
                 });
@@ -512,8 +511,7 @@ namespace OrderingSystem.Infrastructure.Migrations
 
                     b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("ix_tbl_menu_group_name")
-                        .HasFilter("is_deleted = false");
+                        .HasDatabaseName("ix_tbl_menu_group_name");
 
                     b.ToTable("tbl_menu_group", (string)null);
                 });
@@ -527,7 +525,6 @@ namespace OrderingSystem.Infrastructure.Migrations
                         .HasColumnName("menu_id");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("note");
