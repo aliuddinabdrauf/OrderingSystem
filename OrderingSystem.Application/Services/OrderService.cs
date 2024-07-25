@@ -1,5 +1,7 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using OrderingSystem.Application.Hubs;
 using OrderingSystem.Application.Repositories;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 using OrderingSystem.Infrastructure.Dtos;
@@ -15,11 +17,12 @@ namespace OrderingSystem.Application.Services
     {
         Task<bool> AllOrderIsValidToComplete(List<Guid> orderIds);
         Task<List<OrderDto>> GetActiveTableOrder(Guid tableId);
+        Task<List<OrderDto>> GetAllActiveOrders();
         Task PlaceOrder(Guid tableId, List<PlaceOrderDto> orders);
         Task UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, Guid userId);
     }
 
-    public class OrderService(IBaseRepository baseRepository, IOrderRepository orderRepository) : IOrderService
+    public class OrderService(IBaseRepository baseRepository, IOrderRepository orderRepository, IHubContext<OrderHub> orderHubContext) : IOrderService
     {
         public async Task PlaceOrder(Guid tableId, List<PlaceOrderDto> orders)
         {
@@ -30,6 +33,13 @@ namespace OrderingSystem.Application.Services
             }
             baseRepository.AddDataBatch(toSave);
             await baseRepository.SaveChanges();
+            //send new order data realtime to the client
+            await orderHubContext.Clients.All.SendAsync("new-order", toSave.Adapt<List<OrderDto>>());
+        }
+        public async Task<List<OrderDto>> GetAllActiveOrders()
+        {
+            var result = await orderRepository.GetAllActiveOrders();
+            return result;
         }
         public async Task<List<OrderDto>> GetActiveTableOrder(Guid tableId)
         {
@@ -41,6 +51,8 @@ namespace OrderingSystem.Application.Services
             var toUpdate = await baseRepository.GetDataById<TblOrder>(orderId);
             toUpdate.Status = orderStatus;
             await baseRepository.SaveChanges(userId);
+            //send updated event realtime
+            await orderHubContext.Clients.All.SendAsync("order-updated", new {orderId, orderStatus});
         }
         public async Task<TableOrderSummaryDto> GetTableOrderSummary(Guid tableId)
         {

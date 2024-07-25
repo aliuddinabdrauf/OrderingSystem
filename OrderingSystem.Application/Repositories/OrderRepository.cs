@@ -7,27 +7,31 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OrderingSystem.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace OrderingSystem.Application.Repositories
 {
     public interface IOrderRepository
     {
         Task<List<OrderDto>> GetActiveOrderByTable(Guid tableId);
+        Task<List<OrderDto>> GetAllActiveOrders();
         Task<TableOrderSummaryDto> GetTableOrderSummary(Guid tableId);
     }
 
     public class OrderRepository(OrderingSystemDbContext context) : IOrderRepository
     {
-        private IQueryable<OrderDto> GetOrders()
+        private readonly List<OrderStatus> activeStatus = [OrderStatus.Preparing, OrderStatus.Placed];
+        public async Task<List<OrderDto>> GetAllActiveOrders()
         {
-            var result = context.TblOrder.Include(o => o.Menu).Select(o =>
-            new OrderDto(o.Id, o.Menu.Name, o.Total, o.Note, o.TableId, o.Status))
-                .AsQueryable();
+            var result = await context.TblOrder.Include(o => o.Menu).Where(o => activeStatus.Contains(o.Status)).Select(o =>
+            new OrderDto(o.Id, o.Menu.Name, o.Total, o.Note, o.TableId, o.Status, o.TimestampCreated))
+               .ToListAsync();
             return result;
         }
         public async Task<List<OrderDto>> GetActiveOrderByTable(Guid tableId)
         {
-            var result = await GetOrders().Where(o => o.TableId == tableId && new OrderStatus[] {OrderStatus.Preparing, OrderStatus.Placed }.Contains(o.Status))
+            var result = await context.TblOrder.Include(o => o.Menu).Where(o => o.TableId == tableId && activeStatus.Contains(o.Status)).Select(o =>
+            new OrderDto(o.Id, o.Menu.Name, o.Total, o.Note, o.TableId, o.Status, o.TimestampCreated))
                 .ToListAsync();
             return result;
         }

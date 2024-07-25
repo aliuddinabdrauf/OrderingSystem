@@ -1,5 +1,6 @@
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using OrderingSystem.Application;
+using OrderingSystem.Application.Hubs;
 using OrderingSystem.Application.Utils;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 using OrderingSystem.Infrastructure.Dtos;
@@ -107,6 +109,35 @@ builder.Services.AddAuthentication(options =>
          ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
      };
+     //refer to https://learn.microsoft.com/en-us/aspnet/core/signalr/authn-and-authz?view=aspnetcore-8.0
+     // We have to hook the OnMessageReceived event in order to
+     // allow the JWT authentication handler to read the access
+     // token from the query string when a WebSocket or 
+     // Server-Sent Events request comes in.
+
+     // Sending the access token in the query string is required when using WebSockets or ServerSentEvents
+     // due to a limitation in Browser APIs. We restrict it to only calls to the
+     // SignalR hub in this code.
+     // See https://docs.microsoft.com/aspnet/core/signalr/security#access-token-logging
+     // for more information about security considerations when using
+     // the query string to transmit the access token.
+     options.Events = new JwtBearerEvents
+     {
+         OnMessageReceived = context =>
+         {
+             var accessToken = context.Request.Query["access_token"];
+
+             // If the request is for our hub...
+             var path = context.HttpContext.Request.Path;
+             if (!string.IsNullOrEmpty(accessToken) &&
+                 (path.StartsWithSegments("/api/hubs/order")))
+             {
+                 // Read the token out of the query string
+                 context.Token = accessToken;
+             }
+             return Task.CompletedTask;
+         }
+     };
  });
 
 
@@ -145,6 +176,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddApplicationServices();
 
 builder.Services.AddHttpContextAccessor();
+//add signalR for realtime data
+builder.Services.AddSignalR();
 
 //db map images
 TypeAdapterConfig<TblMenu, MenuDto>.NewConfig()
@@ -165,6 +198,7 @@ app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 app.MapControllers();
+app.MapHub<OrderHub>("api/hubs/order");
 
 app.UseAuthentication();
 app.UseAuthorization();

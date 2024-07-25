@@ -12,6 +12,22 @@ namespace OrderingSystem.WebApi.Controllers
     [ApiController]
     public class OrderController(IOrderService orderService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
+        [HttpGet]
+        [Route("all/active")]
+        [ProducesResponseType(typeof(List<OrderDto>), 200)]
+        public async Task<IActionResult> GetAllActiveOrders()
+        {
+            var result = await orderService.GetAllActiveOrders();
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("{tableId}/active")]
+        [ProducesResponseType(typeof(List<OrderDto>), 200)]
+        public async Task<IActionResult> GetActiveTableOrder(Guid tableId)
+        {
+            var result = await orderService.GetActiveTableOrder(tableId);
+            return Ok(result);
+        }
         [HttpPost]
         [Route("create/{tableId}")]
         [ProducesResponseType(204)]

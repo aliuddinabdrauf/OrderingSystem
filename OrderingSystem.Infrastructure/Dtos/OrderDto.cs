@@ -17,7 +17,10 @@ namespace OrderingSystem.Infrastructure.Dtos
         [MaxLength(200)]
         public string? Note { get; set; }
     }
-    public record OrderDto(Guid Id, string MenuName, int Total, string? Note, Guid TableId, OrderStatus Status);
+    public record OrderDto(Guid Id, string MenuName, int Total, string? Note, Guid TableId, OrderStatus Status, DateTimeOffset OrderTime)
+    {
+        public long Version => OrderTime.ToUnixTimeSeconds();
+    };
     public record OrderSummaryDto(Guid Id, string Menu, int Total, string? Note, OrderStatus Status, double Price)
     {
         public double TotalPrice => Price * Total;
