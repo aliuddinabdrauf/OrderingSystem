@@ -183,12 +183,25 @@ namespace OrderingSystem.Application.Services
                 return (result,  HttpMultiStatus.Success);
             }
         }
+        /// <summary>
+        /// This method will delete all the relationship between image file and menu, then it will recreate the relationship, including the new images inserted
+        /// </summary>
+        /// <param name="menuId"></param>
+        /// <param name="newImages"></param>
+        /// <param name="existingImageIds"></param>
+        /// <returns></returns>
+        /// <exception cref="OperationAbortedException"></exception>
         public async Task AssignImagesToMenu(Guid menuId, List<AddFileResultDto> newImages, List<Guid> existingImageIds)
         {
+            //first get new image id list
             var newImageIds = newImages.Where(o => o.IsSuccess).Select(o => o.Id.GetValueOrDefault()).ToList();
+            //combine it with existing image ids
             existingImageIds.AddRange(newImageIds);
+            //get image from db
             var imageFromDb = await baseRepository.GetAllDataWithCondition<TblMenuImage>(o => o.MenuId == menuId);
+            // get deleted image
             var toDelete = imageFromDb.Where(o => !existingImageIds.Contains(o.FileId));
+            // get updated image
             var toUpdate = imageFromDb.Where(o => existingImageIds.Contains(o.FileId));
             foreach(var image in toUpdate)
             {

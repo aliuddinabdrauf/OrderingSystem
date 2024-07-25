@@ -33,7 +33,10 @@ namespace OrderingSystem.Application.Repositories
         void UpdateData<T>(T entity) where T : class;
         void UpdateDataBatch<T>(IEnumerable<T> entities) where T : class;
     }
-
+    /// <summary>
+    /// Default repository implementation
+    /// </summary>
+    /// <param name="context"></param>
     public class BaseRepository(OrderingSystemDbContext context) : IBaseRepository
     {
         private IDbContextTransaction _transaction;
@@ -60,6 +63,7 @@ namespace OrderingSystem.Application.Repositories
         {
             if (isTracked)
             {
+                //select * from tbl_menu
                 return await context.Set<T>().ToListAsync();
             }
             else
@@ -75,6 +79,7 @@ namespace OrderingSystem.Application.Repositories
         public async Task<List<T>> GetAllDataWithCondition<T>(Expression<Func<T, bool>> predicate, bool isTracked = true) where T : class
         {
             var query = GetTrackedOrNot<T>(isTracked);
+            // select * from tbl_menu where ----> id == 1
             return await query.Where(predicate).ToListAsync();
         }
 
@@ -138,13 +143,16 @@ namespace OrderingSystem.Application.Repositories
         public async Task<int> SaveChanges(Guid? userId = null)
         {
             var entries = Enumerable.ToList(context.ChangeTracker.Entries());
+            var jsonFormatting = new JsonSerializerOptions { WriteIndented = false };
             foreach (var entry in entries)
             {
+                //only if entity implement softdelete
                 if (entry.Entity != null && entry.Entity.GetType().IsSubclassOf(typeof(TblBaseSoftDelete)))
                 {
                     var entity = entry.Entity as TblBaseSoftDelete;
                     if (entity != null)
                     {
+                        //instead of delete, it will flag the row as deleted
                         if (entry.State == EntityState.Deleted)
                         {
                             entry.State = EntityState.Modified;
@@ -152,36 +160,42 @@ namespace OrderingSystem.Application.Repositories
                             entity.TimestampDeleted = DateTimeOffset.UtcNow;
                             entity.TimestampUpdated = DateTimeOffset.UtcNow;
                         }
+                        //generate id and related timestamp
                         else if (entry.State == EntityState.Added)
                         {
                             entity.Id = Guid.NewGuid();
                             entity.TimestampUpdated = DateTimeOffset.UtcNow;
                             entity.TimestampCreated = DateTimeOffset.UtcNow;
                         }
+                        //update timestamp updated
                         else if (entry.State == EntityState.Modified)
                         {
                             entity.TimestampUpdated = DateTimeOffset.UtcNow;
                         }
                     }
                 }
+                //if not implement soft delete
                 else if (entry.Entity != null && entry.Entity.GetType().IsSubclassOf(typeof(TblBase)))
                 {
                     var entity = entry.Entity as TblBase;
                     if (entity is not null)
                     {
+                        //generate id and related timestamp
                         if (entry.State == EntityState.Added)
                         {
                             entity.Id = Guid.NewGuid();
                             entity.TimestampUpdated = DateTimeOffset.UtcNow;
                             entity.TimestampCreated = DateTimeOffset.UtcNow;
                         }
+                        //update timestamp updated
                         else if (entry.State == EntityState.Modified)
                         {
                             entity.TimestampUpdated = DateTimeOffset.UtcNow;
                         }
                     }
                 }
-                    if (userId is not null && entry.Entity is not null)
+                //if user id was passed during savechange, add action to audit trail
+                if (userId is not null && entry.Entity is not null)
                 {
                     var auditTrail = new TblAuditTrail
                     {
@@ -190,8 +204,9 @@ namespace OrderingSystem.Application.Repositories
                         ActionTimestamp = DateTimeOffset.UtcNow,
                         ActorId = userId.Value,
                         TableName = entry.Entity.GetType().Name,
-                        Data = JsonSerializer.Serialize(entry.Entity, new JsonSerializerOptions { WriteIndented = false })
+                        Data = JsonSerializer.Serialize(entry.Entity, jsonFormatting)
                     };
+                    //only do this for tbl that implement either TblBaseSoftDelete or TblBase
                     if (entry.Entity.GetType().IsSubclassOf(typeof(TblBaseSoftDelete))){
                         var entity = entry.Entity as TblBaseSoftDelete;
                         if (entity is not null)

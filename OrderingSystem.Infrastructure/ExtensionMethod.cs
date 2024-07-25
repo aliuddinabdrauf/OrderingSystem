@@ -13,6 +13,8 @@ namespace OrderingSystem.Infrastructure
     {
         public static IndexBuilder<T> IsUniqueSoftDelete<T>(this IndexBuilder<T> indexBuilder)
         {
+            //unique key with filter, to exclude the data that fullfill the filter, in this case the soft deleted record
+            //so if the soft deleted record has unique field with value "a", new record with same value in the same field can still be inserted
             return indexBuilder.IsUnique().HasFilter("is_deleted = false");
         }
     }
