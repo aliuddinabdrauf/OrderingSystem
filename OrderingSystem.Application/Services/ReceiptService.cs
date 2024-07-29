@@ -23,7 +23,7 @@ namespace OrderingSystem.Application.Services
         public async Task<Guid> AddReceipt(AddReceiptDto addReceipt, Guid userId)
         {
             var ordersIsValid = await orderService.AllOrderIsValidToComplete(addReceipt.OrderIds);
-            if (ordersIsValid)
+            if (!ordersIsValid)
                 throw new ActionNotValidException("Pesanan tidak dijumpai atau pesanan tidak sah");
             using var t = await baseRepository.StartTransaction();
             var receiptToSave = addReceipt.Adapt<TblReceipt>();
@@ -32,11 +32,12 @@ namespace OrderingSystem.Application.Services
             List<TblOrderToReceipt> orderReceiptToUpdate = [];
             foreach (var orderId in addReceipt.OrderIds)
             {
-                await orderService.UpdateOrderStatus(orderId, OrderStatus.Completed, userId);
+                await orderService.UpdateOrderStatus(orderId, OrderStatus.Paid, userId);
                 orderReceiptToUpdate.Add(new() { OrderId = orderId, ReceiptId = receiptToSave.Id });
             }
             baseRepository.AddDataBatch(orderReceiptToUpdate);
             await baseRepository.SaveChanges();
+            await baseRepository.CommitTransaction();
             return receiptToSave.Id;
         }
         public async Task<ReceiptDto> GetReceipt(Guid receiptId)

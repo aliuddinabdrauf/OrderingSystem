@@ -26,6 +26,7 @@ namespace OrderingSystem.Application.Repositories
         Task<List<T>> GetAllData<T>(bool isTracked = true) where T : class;
         Task<List<T>> GetAllDataWithCondition<T>(Expression<Func<T, bool>> predicate, bool isTracked = true) where T : class;
         Task<T> GetDataById<T>(Guid id) where T : class;
+        Task<long> GetRowVersionById<T>(Guid Id) where T : TblBaseSoftDelete;
         Task<bool> IsExistAsync<T>(Expression<Func<T, bool>> predicate) where T : class;
         Task RollbackTransaction();
         Task<int> SaveChanges(Guid? userId = null);
@@ -82,7 +83,12 @@ namespace OrderingSystem.Application.Repositories
             // select * from tbl_menu where ----> id == 1
             return await query.Where(predicate).ToListAsync();
         }
-
+        public async Task<long> GetRowVersionById<T>(Guid Id) where T : TblBaseSoftDelete
+        {
+            var r = await context.Set<T>().AsNoTracking().Where(o => o.Id == Id)
+                .Select(o => o.TimestampUpdated).FirstAsync();
+            return r.ToUnixTimeSeconds();
+        }
         private IQueryable<T> GetTrackedOrNot<T>(bool isTracked = true) where T : class
         {
             return isTracked ? context.Set<T>() : context.Set<T>().AsNoTracking();

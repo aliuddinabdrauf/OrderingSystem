@@ -19,7 +19,7 @@ namespace OrderingSystem.Infrastructure.Databases.OrderingSystem
     {
         Cash,
         QrScan,
-        CreditCard
+        Card
     }
     public enum OrderStatus
     {

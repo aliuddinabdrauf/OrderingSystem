@@ -28,6 +28,16 @@ namespace OrderingSystem.WebApi.Controllers
             var result = await orderService.GetActiveTableOrder(tableId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{tableId}/summary")]
+        [ProducesResponseType(typeof(List<OrderDto>), 200)]
+        public async Task<IActionResult> GetTableOrderSummary(Guid tableId)
+        {
+            var result = await orderService.GetTableOrderSummary(tableId);
+            return Ok(result);
+        }
+
         [HttpPost]
         [Route("create/{tableId}")]
         [ProducesResponseType(204)]
@@ -38,13 +48,13 @@ namespace OrderingSystem.WebApi.Controllers
         }
 
         [HttpPatch]
-        [Route("{orderId}/{orderStatus}")]
+        [Route("{version}/{orderId}/{orderStatus}")]
         [Authorize]
         [ProducesResponseType(204)]
-        public async Task<IActionResult> UpdateOrderStatus(Guid orderId, OrderStatus orderStatus)
+        public async Task<IActionResult> UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, long version)
         {
             Guid userId = new Guid(userManager.GetUserId(User));
-            await orderService.UpdateOrderStatus(orderId, orderStatus, userId);
+            await orderService.UpdateOrderStatus(orderId, orderStatus, userId, version);
             return NoContent();
         }
     }

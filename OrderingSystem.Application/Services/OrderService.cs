@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using OrderingSystem.Application.Hubs;
 using OrderingSystem.Application.Repositories;
+using OrderingSystem.Infrastructure;
 using OrderingSystem.Infrastructure.Databases.OrderingSystem;
 using OrderingSystem.Infrastructure.Dtos;
 using System;
@@ -18,8 +19,9 @@ namespace OrderingSystem.Application.Services
         Task<bool> AllOrderIsValidToComplete(List<Guid> orderIds);
         Task<List<OrderDto>> GetActiveTableOrder(Guid tableId);
         Task<List<OrderDto>> GetAllActiveOrders();
+        Task<TableOrderSummaryDto> GetTableOrderSummary(Guid tableId);
         Task PlaceOrder(Guid tableId, List<PlaceOrderDto> orders);
-        Task UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, Guid userId);
+        Task UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, Guid userId, long version = 0);
     }
 
     public class OrderService(IBaseRepository baseRepository, IOrderRepository orderRepository, IHubContext<OrderHub> orderHubContext) : IOrderService
@@ -46,13 +48,16 @@ namespace OrderingSystem.Application.Services
             var result = await orderRepository.GetActiveOrderByTable(tableId);
             return result;
         }
-        public async Task UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, Guid userId)
+        public async Task UpdateOrderStatus(Guid orderId, OrderStatus orderStatus, Guid userId, long version = 0)
         {
             var toUpdate = await baseRepository.GetDataById<TblOrder>(orderId);
+            if (version != 0 && toUpdate.TimestampUpdated.ToUnixTimeSeconds() != version)
+                throw new ActionNotValidException("Data had been change since retreiving data");
             toUpdate.Status = orderStatus;
             await baseRepository.SaveChanges(userId);
+            var latestVersion = toUpdate.TimestampUpdated.ToUnixTimeSeconds();
             //send updated event realtime
-            await orderHubContext.Clients.All.SendAsync("order-updated", new {orderId, orderStatus});
+            await orderHubContext.Clients.All.SendAsync("order-updated", new {Id = orderId, Status = orderStatus, Version = latestVersion });
         }
         public async Task<TableOrderSummaryDto> GetTableOrderSummary(Guid tableId)
         {
@@ -61,7 +66,8 @@ namespace OrderingSystem.Application.Services
         }
         public async Task<bool> AllOrderIsValidToComplete(List<Guid> orderIds)
         {
-            if(orderIds.Count == 0) return false;
+            if(orderIds.Count == 0)
+                return false;
             foreach (var orderId in orderIds)
             {
                 var valid = await baseRepository.IsExistAsync<TblOrder>(o => o.Id == orderId && o.Status != OrderStatus.Paid && o.Status != OrderStatus.Rejected);

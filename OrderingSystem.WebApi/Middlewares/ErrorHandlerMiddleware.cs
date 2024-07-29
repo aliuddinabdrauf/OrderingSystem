@@ -49,6 +49,9 @@ namespace OrderingSystem.WebApi.Middlewares
                     error.Error = "Sila hubungi pihak pentadbir bagi mendapatkan bantuan.";
                 }
             }
+            else
+            {//condition for custom exception here
+            }
             context.Response.ContentType = "application/problem+json";
             context.Response.StatusCode = (int)code;
             return context.Response.WriteAsJsonAsync(error);

@@ -17,9 +17,9 @@ namespace OrderingSystem.Infrastructure.Dtos
         [MaxLength(200)]
         public string? Note { get; set; }
     }
-    public record OrderDto(Guid Id, string MenuName, int Total, string? Note, Guid TableId, OrderStatus Status, DateTimeOffset OrderTime)
+    public record OrderDto(Guid Id, string MenuName, int Total, string? Note, Guid TableId, OrderStatus Status, DateTimeOffset UpdateTime)
     {
-        public long Version => OrderTime.ToUnixTimeSeconds();
+        public long Version => UpdateTime.ToUnixTimeSeconds();
     };
     public record OrderSummaryDto(Guid Id, string Menu, int Total, string? Note, OrderStatus Status, double Price)
     {
@@ -27,6 +27,7 @@ namespace OrderingSystem.Infrastructure.Dtos
     }
     public record TableOrderSummaryDto(Guid TableId, string TableNumber, List<OrderSummaryDto> Items)
     {
-        public double TotalAll => Items.Sum(x => x.TotalPrice);
+        public double TotalPriceAll => Items.Sum(x => x.TotalPrice);
+        public double TotalOrderAll => Items.Sum(x => x.Total);
     }
 }

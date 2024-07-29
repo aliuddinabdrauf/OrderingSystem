@@ -23,8 +23,10 @@ namespace OrderingSystem.Application.Repositories
         private readonly List<OrderStatus> activeStatus = [OrderStatus.Preparing, OrderStatus.Placed];
         public async Task<List<OrderDto>> GetAllActiveOrders()
         {
-            var result = await context.TblOrder.Include(o => o.Menu).Where(o => activeStatus.Contains(o.Status)).Select(o =>
-            new OrderDto(o.Id, o.Menu.Name, o.Total, o.Note, o.TableId, o.Status, o.TimestampCreated))
+            var result = await context.TblOrder.Include(o => o.Menu).Where(o => activeStatus.Contains(o.Status))
+                .OrderByDescending(o => o.TimestampCreated)
+                .Select(o =>
+            new OrderDto(o.Id, o.Menu.Name, o.Total, o.Note, o.TableId, o.Status, o.TimestampUpdated))
                .ToListAsync();
             return result;
         }

@@ -11,7 +11,7 @@ namespace OrderingSystem.WebApi.Controllers
     [Route("api/receipt")]
     [ApiController]
     [Authorize(Roles = UserRole.Admin)]
-    public class ReceiptController(ReceiptService receiptService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
+    public class ReceiptController(IReceiptService receiptService, UserManager<IdentityUser<Guid>> userManager) : ControllerBase
     {
         [HttpGet]
         [Route("{receiptId}")]

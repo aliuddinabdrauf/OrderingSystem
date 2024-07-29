@@ -58,7 +58,7 @@ namespace OrderingSystem.WebApi.Controllers
         [Authorize]
         [Route("{tableId}/qrcode")]
         [ProducesResponseType(200)]
-        public IActionResult GetTableQrCode(Guid tableId, [Required]string link)
+        public IActionResult GetTableQrCode(Guid tableId, string link)
         {
             var file = tableService.CreateTableQrCode(tableId, link);
             return File(file.Data, file.ContentType, fileDownloadName:  file.FullName);
