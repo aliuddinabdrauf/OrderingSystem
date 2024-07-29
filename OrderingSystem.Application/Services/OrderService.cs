@@ -36,7 +36,7 @@ namespace OrderingSystem.Application.Services
             baseRepository.AddDataBatch(toSave);
             await baseRepository.SaveChanges();
             //send new order data realtime to the client
-            await orderHubContext.Clients.All.SendAsync("new-order", toSave.Adapt<List<OrderDto>>());
+            await orderHubContext.Clients.All.SendAsync("new-order", toSave.Adapt<List<OrderDto2>>());
         }
         public async Task<List<OrderDto>> GetAllActiveOrders()
         {
